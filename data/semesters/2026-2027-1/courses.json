@@ -1,0 +1,65 @@
+{
+  "_说明": "课表数据。weeks 支持三种写法：range(连续周)、parity(单/双周)、list(指定周)。day: 1=周一 ... 7=周日。periods 为节次数组。",
+  "courses": [
+    {
+      "id": "xmt-56h2",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "56H2",
+      "studentCount": 19,
+      "colorKey": "indigo",
+      "sessions": [
+        { "day": 2, "periods": [1, 2], "weeks": { "type": "range", "from": 1, "to": 16 }, "campus": "三亚部", "building": "北教学楼", "room": "N104" },
+        { "day": 4, "periods": [5, 6], "weeks": { "type": "parity", "parity": "even", "from": 2, "to": 16 }, "campus": "三亚部", "building": "北教学楼", "room": "N104" }
+      ]
+    },
+    {
+      "id": "xmt-6c01",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "6C01",
+      "studentCount": 66,
+      "colorKey": "indigo",
+      "sessions": [
+        { "day": 2, "periods": [5, 6], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N104" },
+        { "day": 2, "periods": [7, 8], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N104" },
+        { "day": 5, "periods": [7, 8], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N104" }
+      ]
+    },
+    {
+      "id": "xmt-6h34",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "6H34",
+      "studentCount": 59,
+      "colorKey": "indigo",
+      "sessions": [
+        { "day": 1, "periods": [3, 4], "weeks": { "type": "range", "from": 1, "to": 16 }, "campus": "三亚部", "building": "北教学楼", "room": "N105" },
+        { "day": 2, "periods": [7, 8], "weeks": { "type": "range", "from": 1, "to": 8 }, "campus": "三亚部", "building": "北教学楼", "room": "N105" }
+      ]
+    },
+    {
+      "id": "cy-6h56",
+      "name": "餐饮数字化运营与管理",
+      "code": "10120BC",
+      "className": "6H56",
+      "studentCount": 50,
+      "colorKey": "teal",
+      "sessions": [
+        { "day": 4, "periods": [7, 8], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N304" }
+      ]
+    },
+    {
+      "id": "cy-6h08",
+      "name": "餐饮数字化运营与管理",
+      "code": "10120BC",
+      "className": "6H08",
+      "studentCount": 66,
+      "colorKey": "teal",
+      "sessions": [
+        { "day": 1, "periods": [5, 6], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N204" },
+        { "day": 6, "periods": [1, 2, 3, 4, 5, 6, 7, 8], "weeks": { "type": "range", "from": 5, "to": 8 }, "campus": "三亚部", "building": "北教学楼", "room": "N205" }
+      ]
+    }
+  ]
+}

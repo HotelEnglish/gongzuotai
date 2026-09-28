@@ -1,0 +1,18 @@
+# WorkBuddy 本地记忆与运行态（可能含凭据/密钥，禁止推送到公开仓库）
+.workbuddy/
+
+# 依赖与构建产物
+node_modules/
+dist/
+.build/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.cache/
+
+# 本地环境变量
+.env
+.env.*

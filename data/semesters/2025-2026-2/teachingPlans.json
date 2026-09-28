@@ -1,0 +1,20 @@
+{
+  "_说明": "历史学期教学计划（示例，全部已完结）。",
+  "plans": [
+    {
+      "courseId": "jsjgc-5h21",
+      "courseName": "酒店信息技术",
+      "className": "5H21",
+      "hours": 48,
+      "goal": "掌握酒店信息系统与办公数字化工具",
+      "assessment": "过程考核 60% + 期末实操 40%",
+      "chapters": [
+        { "title": "酒店信息系统概述", "weeks": "1-2", "hours": 6, "status": "done" },
+        { "title": "PMS 系统实操", "weeks": "3-6", "hours": 12, "status": "done" },
+        { "title": "办公自动化进阶", "weeks": "7-10", "hours": 12, "status": "done" },
+        { "title": "数据分析与报表", "weeks": "11-14", "hours": 10, "status": "done" },
+        { "title": "综合实训", "weeks": "15-16", "hours": 8, "status": "done" }
+      ]
+    }
+  ]
+}

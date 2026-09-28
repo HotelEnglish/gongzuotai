@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>龚作台</title>
+<meta name="description" content="龚作台：课表、日历、教学计划、科研成果集中管理">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <a href="#/dashboard" class="brand-link">
+        <span class="brand-title">龚作台</span>
+        <span class="brand-sub">让龚老师先富起来</span>
+      </a>
+    </div>
+    <nav class="main-nav" id="mainNav" aria-label="主导航">
+      <a href="#/dashboard" data-view="dashboard">首页</a>
+      <a href="#/schedule" data-view="schedule">课表</a>
+      <a href="#/calendar" data-view="calendar">日历</a>
+      <a href="#/plans" data-view="plans">教学计划</a>
+      <a href="#/publications" data-view="publications">科研成果</a>
+      <a href="#/about" data-view="about">关于</a>
+    </nav>
+    <div class="header-actions">
+      <select id="semesterSelect" class="semester-select" aria-label="切换学期"></select>
+      <button id="themeToggle" class="text-btn" type="button">暗色</button>
+      <a id="githubLink" class="text-btn" href="#" target="_blank" rel="noopener">GitHub</a>
+      <button id="menuToggle" class="menu-toggle" type="button" aria-label="打开菜单">菜单</button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="移动端导航">
+    <a href="#/dashboard" data-view="dashboard">首页</a>
+    <a href="#/schedule" data-view="schedule">课表</a>
+    <a href="#/calendar" data-view="calendar">日历</a>
+    <a href="#/plans" data-view="plans">教学计划</a>
+    <a href="#/publications" data-view="publications">科研成果</a>
+    <a href="#/about" data-view="about">关于</a>
+  </nav>
+</header>
+
+<main id="app" class="app-main">
+  <div class="loading">加载中…</div>
+</main>
+
+<footer class="site-footer">
+  <span>Copyright 2026 龚作台 · 知识改变命运 科技改善生活</span>
+</footer>
+
+<div id="modalOverlay" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modalClose" type="button" aria-label="关闭">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

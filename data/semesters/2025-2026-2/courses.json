@@ -1,0 +1,27 @@
+{
+  "_说明": "历史学期示例课表，请按实际归档数据更新。",
+  "courses": [
+    {
+      "id": "jsjgc-5h21",
+      "name": "酒店信息技术",
+      "code": "10101BA",
+      "className": "5H21",
+      "studentCount": 45,
+      "colorKey": "cyan",
+      "sessions": [
+        { "day": 2, "periods": [3, 4], "weeks": { "type": "range", "from": 1, "to": 16 }, "campus": "三亚部", "building": "北教学楼", "room": "N301" }
+      ]
+    },
+    {
+      "id": "sdp-5h22",
+      "name": "短视频拍摄与制作",
+      "code": "10232BA",
+      "className": "5H22",
+      "studentCount": 42,
+      "colorKey": "orange",
+      "sessions": [
+        { "day": 4, "periods": [5, 6], "weeks": { "type": "range", "from": 1, "to": 16 }, "campus": "三亚部", "building": "实训楼", "room": "S201" }
+      ]
+    }
+  ]
+}

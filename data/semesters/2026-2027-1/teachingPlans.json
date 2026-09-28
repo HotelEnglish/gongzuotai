@@ -1,0 +1,36 @@
+{
+  "_说明": "教学计划数据（示例结构，请按实际进度更新 chapters 的 status：done / doing / todo）。",
+  "plans": [
+    {
+      "courseId": "xmt-56h2",
+      "courseName": "新媒体运营实务",
+      "className": "56H2",
+      "hours": 56,
+      "goal": "掌握新媒体平台运营方法与内容策划能力",
+      "assessment": "过程考核 60% + 期末作品 40%",
+      "chapters": [
+        { "title": "新媒体运营概述与岗位认知", "weeks": "1-2", "hours": 6, "status": "done" },
+        { "title": "账号定位与内容策划", "weeks": "3-5", "hours": 10, "status": "doing" },
+        { "title": "短视频平台运营实务", "weeks": "6-9", "hours": 12, "status": "todo" },
+        { "title": "图文平台与公众号运营", "weeks": "10-12", "hours": 10, "status": "todo" },
+        { "title": "数据复盘与增长", "weeks": "13-14", "hours": 8, "status": "todo" },
+        { "title": "综合实训与作品路演", "weeks": "15-16", "hours": 10, "status": "todo" }
+      ]
+    },
+    {
+      "courseId": "cy-6h56",
+      "courseName": "餐饮数字化运营与管理",
+      "className": "6H56",
+      "hours": 32,
+      "goal": "理解餐饮企业数字化运营全流程与工具应用",
+      "assessment": "过程考核 50% + 期末方案 50%",
+      "chapters": [
+        { "title": "餐饮数字化概述", "weeks": "10", "hours": 4, "status": "todo" },
+        { "title": "点餐与收银系统实操", "weeks": "11-12", "hours": 8, "status": "todo" },
+        { "title": "外卖平台与私域运营", "weeks": "13-14", "hours": 8, "status": "todo" },
+        { "title": "会员与营销数字化", "weeks": "15-16", "hours": 6, "status": "todo" },
+        { "title": "数字化方案设计实训", "weeks": "17", "hours": 6, "status": "todo" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "site": {
+    "title": "龚作台",
+    "owner": "龚光彬",
+    "subtitle": "让龚老师先富起来",
+    "github": "https://github.com/HotelEnglish",
+    "themes": ["light", "dark"]
+  },
+  "currentSemester": "2026-2027-1",
+  "semesters": [
+    { "id": "2026-2027-1", "name": "2026-2027学年 第一学期", "status": "current" },
+    { "id": "2025-2026-2", "name": "2025-2026学年 第二学期", "status": "past" }
+  ]
+}

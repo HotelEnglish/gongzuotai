@@ -1,0 +1,13 @@
+[Unit]
+Description=Teaching Workbench GitHub Webhook Deploy Receiver
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /var/www/teaching-workbench/deploy/webhook.py
+Restart=always
+RestartSec=3
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

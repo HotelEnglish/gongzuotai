@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>教学工作台 · Miro</title>
+  <!--
+    单文件 HTML 原型（不含任务模块）
+    - 数据全部内联在下方脚本中（避免 file:// 下的 fetch/CORS 问题，双击即可打开）
+    - 零依赖、零构建：纯 HTML + CSS + 原生 JS
+    - 视觉规范遵循 02-architecture.md 第 4.2 节设计令牌
+    - 正式开发时将数据外置到 data/ 目录并通过 fetch 加载
+  -->
+  <style>
+    /* ===================== 设计令牌（CSS 变量） ===================== */
+    :root {
+      --color-primary: #2563eb;
+      --color-primary-deep: #1e3a5f;
+      --color-accent: #0ea5e9;
+      --color-warn: #f59e0b;
+      --color-success: #22c55e;
+      --color-bg: #f5f7fa;
+      --color-surface: #ffffff;
+      --color-text: #0f172a;
+      --color-muted: #64748b;
+      --color-border: #e5e7eb;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --space: 8px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, .08);
+      --font-cn: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    [data-theme="dark"] {
+      --color-primary: #60a5fa;
+      --color-primary-deep: #0f2440;
+      --color-accent: #38bdf8;
+      --color-warn: #fbbf24;
+      --color-success: #4ade80;
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-text: #e2e8f0;
+      --color-muted: #94a3b8;
+      --color-border: #334155;
+      --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+    }
+
+    /* ===================== 基础样式 ===================== */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-cn);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background .25s ease, color .25s ease;
+    }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 calc(var(--space) * 2); }
+    .page { padding: calc(var(--space) * 3) 0 calc(var(--space) * 6); }
+    .page-title { font-size: 22px; font-weight: 700; margin: 0 0 var(--space); }
+    .page-sub { color: var(--color-muted); margin: 0 0 calc(var(--space) * 3); font-size: 14px; }
+    .muted { color: var(--color-muted); }
+    .hidden { display: none !important; }
+
+    /* ===================== Header ===================== */
+    header.topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--color-primary-deep);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    }
+    .topbar-inner {
+      display: flex; align-items: center; gap: var(--space);
+      height: 60px; max-width: 1200px; margin: 0 auto;
+      padding: 0 calc(var(--space) * 2);
+    }
+    .brand { display: flex; align-items: center; gap: var(--space); font-weight: 700; font-size: 18px; white-space: nowrap; }
+    .brand .logo {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      display: grid; place-items: center; font-size: 16px;
+    }
+    .brand small { font-weight: 400; opacity: .8; font-size: 12px; }
+    nav.mainnav { display: flex; gap: 4px; margin-left: auto; }
+    nav.mainnav a {
+      color: #fff; opacity: .85; padding: 8px 12px; border-radius: var(--radius-sm);
+      font-size: 14px; white-space: nowrap;
+    }
+    nav.mainnav a:hover { background: rgba(255, 255, 255, .12); text-decoration: none; opacity: 1; }
+    nav.mainnav a.active { background: rgba(255, 255, 255, .2); opacity: 1; font-weight: 600; }
+    .tools { display: flex; align-items: center; gap: var(--space); margin-left: var(--space); }
+    .semester-select {
+      background: rgba(255, 255, 255, .12); color: #fff; border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: var(--radius-sm); padding: 6px 10px; font-size: 13px; font-family: var(--font-cn);
+      cursor: pointer; max-width: 220px;
+    }
+    .semester-select option { color: #111; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer; font-size: 16px;
+      display: grid; place-items: center; transition: background .2s;
+    }
+    .icon-btn:hover { background: rgba(255, 255, 255, .22); }
+    .hamburger { display: none; }
+
+    /* 移动端抽屉 */
+    .drawer-backdrop {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 60; display: none;
+    }
+    .drawer {
+      position: fixed; top: 0; right: 0; height: 100%; width: 260px; z-index: 70;
+      background: var(--color-surface); color: var(--color-text); box-shadow: -4px 0 16px rgba(0, 0, 0, .2);
+      transform: translateX(100%); transition: transform .25s ease; padding: calc(var(--space) * 3) calc(var(--space) * 2);
+      display: flex; flex-direction: column; gap: var(--space);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer a { padding: 12px; border-radius: var(--radius-sm); color: var(--color-text); font-size: 15px; }
+    .drawer a:hover { background: var(--color-bg); text-decoration: none; }
+    .drawer a.active { background: var(--color-primary); color: #fff; font-weight: 600; }
+    .drawer .drawer-close { align-self: flex-end; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--color-text); }
+
+    /* ===================== 卡片 ===================== */
+    .card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius); padding: calc(var(--space) * 2); box-shadow: var(--shadow);
+    }
+    .grid { display: grid; gap: calc(var(--space) * 2); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-auto { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+    /* ===================== 统计卡 ===================== */
+    .stat {
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+      padding: calc(var(--space) * 2); box-shadow: var(--shadow); text-align: center;
+    }
+    .stat .num { font-size: 30px; font-weight: 700; color: var(--color-primary); line-height: 1.2; }
+    .stat .label { font-size: 13px; color: var(--color-muted); margin-top: 4px; }
+
+    /* ===================== 顶部信息条 ===================== */
+    .infobar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--space) * 2);
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+      padding: calc(var(--space) * 2); box-shadow: var(--shadow); margin-bottom: calc(var(--space) * 3);
+    }
+    .infobar .date { font-size: 18px; font-weight: 600; }
+    .infobar .countdown {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+      background: rgba(245, 158, 11, .15); color: var(--color-warn); font-weight: 600; font-size: 14px;
+    }
+    .infobar .countdown.soon { background: rgba(239, 68, 68, .15); color: #ef4444; }
+
+    /* ===================== 今日课程 ===================== */
+    .section-h { font-size: 16px; font-weight: 700; margin: calc(var(--space) * 3) 0 var(--space); display: flex; align-items: center; gap: var(--space); }
+    .today-course {
+      display: flex; align-items: center; gap: calc(var(--space) * 2); padding: calc(var(--space) * 1.5);
+      border-left: 4px solid var(--color-primary); border-radius: var(--radius-sm);
+      background: var(--color-surface); border: 1px solid var(--color-border); border-left-width: 4px; margin-bottom: var(--space);
+    }
+    .today-course .time { font-family: var(--font-mono); font-weight: 600; color: var(--color-primary); white-space: nowrap; }
+    .today-course .meta { flex: 1; }
+    .today-course .cname { font-weight: 600; }
+    .today-course .csub { font-size: 13px; color: var(--color-muted); }
+
+    /* ===================== 快捷入口 ===================== */
+    .quick {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space);
+    }
+    .quick a {
+      display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(var(--space) * 2);
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+      color: var(--color-text); box-shadow: var(--shadow); transition: transform .15s, border-color .15s;
+    }
+    .quick a:hover { transform: translateY(-2px); border-color: var(--color-primary); text-decoration: none; }
+    .quick .ic { font-size: 24px; }
+    .quick .tx { font-size: 13px; }
+
+    /* ===================== 课表 ===================== */
+    .controls { display: flex; flex-wrap: wrap; gap: var(--space); margin-bottom: calc(var(--space) * 2); align-items: center; }
+    .controls label { font-size: 13px; color: var(--color-muted); }
+    select.filter {
+      background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); padding: 7px 10px; font-family: var(--font-cn); font-size: 13px; cursor: pointer;
+    }
+    .schedule-scroll { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--color-border); background: var(--color-surface); }
+    .schedule-grid { display: grid; grid-template-columns: 64px repeat(7, minmax(96px, 1fr)); min-width: 760px; }
+    .sg-cell { border-right: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 4px; min-height: 56px; }
+    .sg-head { background: var(--color-bg); position: sticky; top: 0; font-weight: 600; font-size: 13px; text-align: center; padding: 10px 4px; }
+    .sg-head.weekend, .sg-cell.weekend { background: rgba(100, 116, 139, .08); }
+    .sg-period { background: var(--color-bg); font-size: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center; font-weight: 600; }
+    .sg-period small { color: var(--color-muted); font-weight: 400; }
+    .course-block {
+      border-radius: var(--radius-sm); padding: 5px 6px; margin: 3px 0; color: #fff; font-size: 12px; line-height: 1.35;
+      cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+    }
+    .course-block .cb-name { font-weight: 700; }
+    .course-block .cb-sub { opacity: .92; }
+    .course-block .cb-loc { opacity: .85; }
+
+    /* ===================== 日历 ===================== */
+    .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space); }
+    .cal-head .month { font-size: 18px; font-weight: 700; }
+    .cal-nav { display: flex; gap: var(--space); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-dow { text-align: center; font-size: 12px; color: var(--color-muted); padding: 6px 0; font-weight: 600; }
+    .cal-dow.we { color: var(--color-warn); }
+    .cal-day {
+      aspect-ratio: 1 / 1; border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      background: var(--color-surface); display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative; cursor: default; font-size: 14px;
+    }
+    .cal-day.empty { background: transparent; border: none; }
+    .cal-day.has-class { cursor: pointer; }
+    .cal-day.has-class::after {
+      content: ""; position: absolute; bottom: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary);
+    }
+    .cal-day.today { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, .25); font-weight: 700; }
+    .cal-day.selected { background: var(--color-primary); color: #fff; }
+    .cal-day.selected::after { background: #fff; }
+    .cal-day.out { color: var(--color-muted); opacity: .5; }
+    .cal-detail { margin-top: calc(var(--space) * 2); }
+    .cal-detail .day-title { font-weight: 700; margin-bottom: var(--space); }
+
+    /* ===================== 教学计划 ===================== */
+    .plan-card { cursor: pointer; transition: border-color .15s; }
+    .plan-card:hover { border-color: var(--color-primary); }
+    .plan-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space); }
+    .plan-head .pname { font-size: 16px; font-weight: 700; }
+    .plan-head .psub { font-size: 13px; color: var(--color-muted); }
+    .progress { height: 8px; background: var(--color-border); border-radius: 999px; overflow: hidden; margin: var(--space) 0; }
+    .progress > span { display: block; height: 100%; background: var(--color-success); border-radius: 999px; }
+    .progress-meta { font-size: 13px; color: var(--color-muted); }
+    .plan-detail { margin-top: calc(var(--space) * 2); border-top: 1px dashed var(--color-border); padding-top: calc(var(--space) * 2); }
+    .chapter { display: flex; align-items: center; gap: var(--space); padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+    .chapter:last-child { border-bottom: none; }
+    .chapter .ch-no { width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .chapter .ch-main { flex: 1; }
+    .chapter .ch-title { font-weight: 600; }
+    .chapter .ch-sub { font-size: 12px; color: var(--color-muted); }
+    .badge { font-size: 12px; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+    .badge.done { background: rgba(34, 197, 94, .15); color: var(--color-success); }
+    .badge.in-progress { background: rgba(245, 158, 11, .15); color: var(--color-warn); }
+    .badge.planned { background: rgba(100, 116, 139, .15); color: var(--color-muted); }
+    .pill { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 999px; background: rgba(37, 99, 235, .12); color: var(--color-primary); margin: 2px; }
+    .pill.gray { background: var(--color-bg); color: var(--color-muted); border: 1px solid var(--color-border); }
+
+    /* ===================== 科研成果 ===================== */
+    .tabs { display: flex; flex-wrap: wrap; gap: var(--space); margin-bottom: calc(var(--space) * 2); }
+    .tab {
+      padding: 6px 16px; border-radius: 999px; border: 1px solid var(--color-border); background: var(--color-surface);
+      cursor: pointer; font-size: 13px; color: var(--color-text);
+    }
+    .tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .year-group { margin-bottom: calc(var(--space) * 3); }
+    .year-label { font-size: 15px; font-weight: 700; color: var(--color-muted); border-left: 3px solid var(--color-primary); padding-left: 10px; margin-bottom: var(--space); }
+    .pub-item { display: flex; gap: calc(var(--space) * 1.5); padding: calc(var(--space) * 1.5); }
+    .pub-item .pub-ic { font-size: 22px; flex-shrink: 0; }
+    .pub-item .pub-title { font-weight: 600; }
+    .pub-item .pub-meta { font-size: 13px; color: var(--color-muted); margin-top: 2px; }
+
+    /* ===================== 关于 ===================== */
+    .profile { display: flex; gap: calc(var(--space) * 3); flex-wrap: wrap; align-items: center; }
+    .avatar {
+      width: 96px; height: 96px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+      font-size: 34px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    }
+    .profile .pname { font-size: 22px; font-weight: 700; }
+    .profile .ptitle { color: var(--color-muted); }
+    .link-row { display: flex; flex-wrap: wrap; gap: var(--space); margin-top: var(--space); }
+    .link-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font-size: 14px;
+      cursor: pointer;
+    }
+    .link-btn:hover { border-color: var(--color-primary); text-decoration: none; }
+
+    /* ===================== Footer ===================== */
+    footer.sitefoot {
+      border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 13px;
+      padding: calc(var(--space) * 3) 0; text-align: center; margin-top: calc(var(--space) * 4);
+    }
+
+    /* ===================== 响应式 ===================== */
+    @media (max-width: 860px) {
+      nav.mainnav { display: none; }
+      .hamburger { display: grid; }
+      .semester-select { max-width: 150px; font-size: 12px; padding: 5px 8px; }
+      .brand small { display: none; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .grid-4 { grid-template-columns: 1fr; }
+      .topbar-inner { padding: 0 var(--space); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="logo">📚</span>
+        <span>教学工作台 <small>· Miro</small></span>
+      </div>
+      <nav class="mainnav" id="mainnav"></nav>
+      <div class="tools">
+        <select class="semester-select" id="semesterSelect" aria-label="学期切换"></select>
+        <button class="icon-btn" id="themeToggle" title="切换主题" aria-label="切换主题">🌙</button>
+        <a class="icon-btn" href="#" title="GitHub 源码" aria-label="GitHub">⌨</a>
+        <button class="icon-btn hamburger" id="hamburger" title="菜单" aria-label="菜单">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer">
+    <button class="drawer-close" id="drawerClose" aria-label="关闭">×</button>
+    <nav id="drawerNav"></nav>
+  </aside>
+
+  <main id="app" class="container page"></main>
+
+  <footer class="sitefoot">
+    <div class="container">© 龚光彬 (Miro) · 三亚中瑞酒店管理职业学院 酒店管理系 · 最后更新 2026-06-18 · 原型预览版</div>
+  </footer>
+
+  <script>
+  /* =====================================================================
+   *  教学工作台 · 单文件原型
+   *  数据内联（mock）。正式版将外置到 data/ 并通过 fetch 加载。
+   * ===================================================================== */
+
+  /* ---------------- 原型演示用"今天"（正式版改为 new Date()） ----------------
+   * 选取学期内一个周三（2026-10-14），让首页/日历/课表都有可观内容。
+   * 若想回到真实日期，把下面一行替换为：const TODAY = new Date();
+   */
+  const TODAY = new Date(2026, 9, 14, 12, 0, 0); // 2026-10-14 周三
+
+  /* ---------------------- 导航定义 ---------------------- */
+  const NAV = [
+    { key: 'dashboard',      label: '首页',   icon: '🏠' },
+    { key: 'schedule',       label: '课表',   icon: '🗓️' },
+    { key: 'calendar',       label: '日历',   icon: '📅' },
+    { key: 'teaching-plans', label: '教学计划', icon: '📘' },
+    { key: 'research',       label: '科研成果', icon: '🔬' },
+    { key: 'about',          label: '关于',   icon: '👤' },
+  ];
+
+  const WEEK_CN = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const CAL_DOW = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+  const TYPE_META = {
+    journal:    { label: '论文', icon: '📄' },
+    book:       { label: '教材', icon: '📘' },
+    project:    { label: '课题', icon: '🔬' },
+    award:      { label: '获奖', icon: '🏆' },
+    conference: { label: '会议', icon: '🎓' },
+    patent:     { label: '专利', icon: '📜' },
+  };
+
+  const STATUS_META = {
+    done:         { label: '已完成', cls: 'done' },
+    'in-progress':{ label: '进行中', cls: 'in-progress' },
+    planned:      { label: '未开始', cls: 'planned' },
+  };
+
+  /* 节次定义：开始时间 -> 节次标签（用于课表网格匹配） */
+  const PERIODS = [
+    { no: '1-2',  start: '08:00', end: '09:40' },
+    { no: '3-4',  start: '10:00', end: '11:40' },
+    { no: '5-6',  start: '14:00', end: '15:40' },
+    { no: '7-8',  start: '16:00', end: '17:40' },
+    { no: '9-10', start: '19:00', end: '20:40' },
+  ];
+  const PERIOD_BY_START = {};
+  PERIODS.forEach(p => { PERIOD_BY_START[p.start] = p.no; });
+
+  /* =====================================================================
+   *  Mock 数据
+   * ===================================================================== */
+
+  const SEMESTERS = [
+    {
+      id: '2026-2027-1',
+      name: '2026-2027 第一学期（当前）',
+      code: '2026-1',
+      startDate: '2026-09-07',
+      endDate: '2027-01-15',
+      totalWeeks: 18,
+      current: true,
+      courses: [
+        {
+          id: 'hotel-it', name: '酒店信息技术', code: 'HOT201', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2401', '酒店2402'], location: '实训楼 B305',
+          color: '#2563eb',
+          sessions: [
+            { dayOfWeek: 1, start: '08:00', end: '09:40', weeks: '1-18' },
+            { dayOfWeek: 3, start: '10:00', end: '11:40', weeks: '1-18' },
+          ],
+        },
+        {
+          id: 'short-video', name: '短视频拍摄与制作', code: 'MED310', type: '选修', credit: 2,
+          teacher: '龚光彬', classes: ['酒店2403'], location: '融媒体实验室', color: '#22c55e',
+          sessions: [
+            { dayOfWeek: 2, start: '14:00', end: '15:40', weeks: '1-16' },
+            { dayOfWeek: 4, start: '14:00', end: '15:40', weeks: '1-16(单周)' },
+          ],
+        },
+        {
+          id: 'newmedia', name: '新媒体运营实务', code: 'MED320', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2401', '酒店2404'], location: '融媒体实验室 2',
+          color: '#f59e0b',
+          sessions: [
+            { dayOfWeek: 3, start: '08:00', end: '09:40', weeks: '1-18' },
+            { dayOfWeek: 5, start: '10:00', end: '11:40', weeks: '1-18' },
+          ],
+        },
+        {
+          id: 'fnb-digital', name: '餐饮数字化运营与管理', code: 'HOT230', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2402', '酒店2403'], location: '实训楼 A201',
+          color: '#8b5cf6',
+          sessions: [
+            { dayOfWeek: 2, start: '10:00', end: '11:40', weeks: '1-18' },
+            { dayOfWeek: 4, start: '08:00', end: '09:40', weeks: '1-18' },
+          ],
+        },
+        {
+          id: 'hotel-english', name: '酒店英语', code: 'HOT210', type: '选修', credit: 2,
+          teacher: '龚光彬', classes: ['酒店2401'], location: '语音室 L308',
+          color: '#0ea5e9',
+          sessions: [
+            { dayOfWeek: 5, start: '08:00', end: '09:40', weeks: '1-16' },
+            { dayOfWeek: 1, start: '14:00', end: '15:40', weeks: '1-16(单周)' },
+          ],
+        },
+      ],
+      plans: [
+        {
+          id: 'plan-hotel-it', courseId: 'hotel-it', courseName: '酒店信息技术',
+          summary: '面向高职酒店管理专业的酒店信息系统与数字化运营基础课程。',
+          objectives: ['掌握 PMS 基本业务流程', '理解酒店数据中台与智慧酒店架构'],
+          assessment: '平时 40% + 期末 60%',
+          chapters: [
+            { no: 1, title: '酒店信息系统概述', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: 'PMS 前台管理系统实操', hours: 6, week: '3-5', status: 'done' },
+            { no: 3, title: '餐饮 POS 与数字化收银', hours: 4, week: '6-7', status: 'in-progress' },
+            { no: 4, title: '酒店数据中台基础', hours: 4, week: '8-10', status: 'planned' },
+            { no: 5, title: '智慧酒店与 AI 应用', hours: 4, week: '11-13', status: 'planned' },
+          ],
+        },
+        {
+          id: 'plan-short-video', courseId: 'short-video', courseName: '短视频拍摄与制作',
+          summary: '从设备、运镜到剪辑调色与运营变现的短视频全流程实践课。',
+          objectives: ['独立完成短视频拍摄与剪辑', '掌握主流平台运营逻辑'],
+          assessment: '作品集 60% + 理论 40%',
+          chapters: [
+            { no: 1, title: '拍摄设备与运镜基础', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: '构图与光线', hours: 4, week: '3-4', status: 'done' },
+            { no: 3, title: '剪辑与调色', hours: 6, week: '5-9', status: 'in-progress' },
+            { no: 4, title: '短视频运营与变现', hours: 4, week: '10-12', status: 'planned' },
+          ],
+        },
+        {
+          id: 'plan-newmedia', courseId: 'newmedia', courseName: '新媒体运营实务',
+          summary: '本学期新增课程（48 节），聚焦图文/短视频内容策划与数据增长。',
+          objectives: ['具备新媒体内容策划能力', '能用数据驱动运营决策'],
+          assessment: '项目实战 50% + 平时 50%',
+          chapters: [
+            { no: 1, title: '新媒体平台生态', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: '内容策划与选题', hours: 4, week: '3-4', status: 'in-progress' },
+            { no: 3, title: '图文与短视频制作', hours: 6, week: '5-8', status: 'planned' },
+            { no: 4, title: '数据分析与增长', hours: 4, week: '9-11', status: 'planned' },
+            { no: 5, title: '综合实战项目', hours: 4, week: '12-16', status: 'planned' },
+          ],
+        },
+        {
+          id: 'plan-fnb', courseId: 'fnb-digital', courseName: '餐饮数字化运营与管理',
+          summary: '以数字教材建设为抓手的餐饮运营数字化课程。',
+          objectives: ['掌握餐饮管理系统应用', '理解供应链与会员营销数字化'],
+          assessment: '平时 40% + 数字教材任务 30% + 期末 30%',
+          chapters: [
+            { no: 1, title: '餐饮管理系统概述', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: '点餐与收银数字化', hours: 6, week: '3-5', status: 'done' },
+            { no: 3, title: '供应链与库存管理', hours: 4, week: '6-8', status: 'in-progress' },
+            { no: 4, title: '会员与营销数字化', hours: 4, week: '9-11', status: 'planned' },
+            { no: 5, title: '数字教材编写实践', hours: 4, week: '12-16', status: 'planned' },
+          ],
+        },
+        {
+          id: 'plan-hotel-english', courseId: 'hotel-english', courseName: '酒店英语',
+          summary: '面向酒店一线岗位的实用英语沟通课程。',
+          objectives: ['胜任前台/客房/餐饮英语接待', '能处理常见客诉英语场景'],
+          assessment: '口语 50% + 笔试 50%',
+          chapters: [
+            { no: 1, title: '前台接待英语', hours: 4, week: '1-3', status: 'done' },
+            { no: 2, title: '客房服务英语', hours: 4, week: '4-6', status: 'in-progress' },
+            { no: 3, title: '餐饮会话英语', hours: 4, week: '7-9', status: 'planned' },
+            { no: 4, title: '投诉处理英语', hours: 4, week: '10-12', status: 'planned' },
+          ],
+        },
+      ],
+    },
+    {
+      id: '2025-2026-2',
+      name: '2025-2026 第二学期（历史）',
+      code: '2025-2',
+      startDate: '2025-02-24',
+      endDate: '2025-07-04',
+      totalWeeks: 18,
+      current: false,
+      courses: [
+        {
+          id: 'hotel-it', name: '酒店信息技术', code: 'HOT201', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2301', '酒店2302'], location: '实训楼 B305',
+          color: '#2563eb',
+          sessions: [
+            { dayOfWeek: 1, start: '08:00', end: '09:40', weeks: '1-18' },
+            { dayOfWeek: 3, start: '10:00', end: '11:40', weeks: '1-18' },
+          ],
+        },
+        {
+          id: 'hotel-dm', name: '酒店数字化营销', code: 'HOT220', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2303'], location: '智慧教室 C102',
+          color: '#f59e0b',
+          sessions: [
+            { dayOfWeek: 2, start: '14:00', end: '15:40', weeks: '1-16' },
+            { dayOfWeek: 5, start: '08:00', end: '09:40', weeks: '1-16' },
+          ],
+        },
+        {
+          id: 'fnb-digital', name: '餐饮数字化运营与管理', code: 'HOT230', type: '必修', credit: 3,
+          teacher: '龚光彬', classes: ['酒店2302', '酒店2303'], location: '实训楼 A201',
+          color: '#8b5cf6',
+          sessions: [
+            { dayOfWeek: 2, start: '10:00', end: '11:40', weeks: '1-18' },
+            { dayOfWeek: 4, start: '08:00', end: '09:40', weeks: '1-18' },
+          ],
+        },
+        {
+          id: 'hotel-english', name: '酒店英语', code: 'HOT210', type: '选修', credit: 2,
+          teacher: '龚光彬', classes: ['酒店2301'], location: '语音室 L308',
+          color: '#0ea5e9',
+          sessions: [
+            { dayOfWeek: 3, start: '08:00', end: '09:40', weeks: '1-16' },
+            { dayOfWeek: 5, start: '10:00', end: '11:40', weeks: '1-16' },
+          ],
+        },
+      ],
+      plans: [
+        {
+          id: 'plan-hotel-it', courseId: 'hotel-it', courseName: '酒店信息技术',
+          summary: '酒店信息系统与数字化运营基础（历史学期，已全部完成）。',
+          objectives: ['掌握 PMS 基本业务流程', '理解酒店数据中台'],
+          assessment: '平时 40% + 期末 60%',
+          chapters: [
+            { no: 1, title: '酒店信息系统概述', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: 'PMS 前台管理系统实操', hours: 6, week: '3-5', status: 'done' },
+            { no: 3, title: '餐饮 POS 与数字化收银', hours: 4, week: '6-7', status: 'done' },
+            { no: 4, title: '酒店数据中台基础', hours: 4, week: '8-10', status: 'done' },
+            { no: 5, title: '智慧酒店与 AI 应用', hours: 4, week: '11-13', status: 'done' },
+          ],
+        },
+        {
+          id: 'plan-hotel-dm', courseId: 'hotel-dm', courseName: '酒店数字化营销',
+          summary: '酒店数字化营销与渠道运营（历史学期，已全部完成）。',
+          objectives: ['掌握 OTA 与私域运营', '能策划数字化营销活动'],
+          assessment: '案例 50% + 期末 50%',
+          chapters: [
+            { no: 1, title: '数字化营销概述', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: 'OTA 渠道运营', hours: 6, week: '3-5', status: 'done' },
+            { no: 3, title: '私域与会员运营', hours: 4, week: '6-8', status: 'done' },
+            { no: 4, title: '数据驱动营销', hours: 4, week: '9-11', status: 'done' },
+          ],
+        },
+        {
+          id: 'plan-fnb', courseId: 'fnb-digital', courseName: '餐饮数字化运营与管理',
+          summary: '餐饮运营数字化（历史学期，已全部完成）。',
+          objectives: ['掌握餐饮管理系统', '理解供应链数字化'],
+          assessment: '平时 40% + 期末 60%',
+          chapters: [
+            { no: 1, title: '餐饮管理系统概述', hours: 4, week: '1-2', status: 'done' },
+            { no: 2, title: '点餐与收银数字化', hours: 6, week: '3-5', status: 'done' },
+            { no: 3, title: '供应链与库存管理', hours: 4, week: '6-8', status: 'done' },
+            { no: 4, title: '会员与营销数字化', hours: 4, week: '9-11', status: 'done' },
+          ],
+        },
+        {
+          id: 'plan-hotel-english', courseId: 'hotel-english', courseName: '酒店英语',
+          summary: '酒店一线岗位实用英语（历史学期，已全部完成）。',
+          objectives: ['胜任酒店英语接待', '处理常见客诉'],
+          assessment: '口语 50% + 笔试 50%',
+          chapters: [
+            { no: 1, title: '前台接待英语', hours: 4, week: '1-3', status: 'done' },
+            { no: 2, title: '客房服务英语', hours: 4, week: '4-6', status: 'done' },
+            { no: 3, title: '餐饮会话英语', hours: 4, week: '7-9', status: 'done' },
+            { no: 4, title: '投诉处理英语', hours: 4, week: '10-12', status: 'done' },
+          ],
+        },
+      ],
+    },
+  ];
+
+  /* 科研成果（跨学期，全局） */
+  const PUBLICATIONS = [
+    {
+      id: 'pub-1', type: 'journal', title: '高职院校酒店管理专业智慧教育改革路径研究',
+      authors: ['龚光彬', '李文'], venue: '中国职业技术教育', year: 2025, month: 3,
+      level: '核心期刊', role: '第一作者', tags: ['智慧教育', '高职'], highlight: true,
+    },
+    {
+      id: 'pub-2', type: 'journal', title: '酒店 AI 应用场景与人才培养模式探析',
+      authors: ['龚光彬'], venue: '教育信息化论坛', year: 2024, month: 11,
+      level: '普通期刊', role: '第一作者', tags: ['AI', '酒店'], highlight: false,
+    },
+    {
+      id: 'pub-3', type: 'book', title: '移动营销',
+      authors: ['王敏', '龚光彬（副主编）'], venue: '高等教育出版社', year: 2024, month: 6,
+      level: '十四五规划教材', role: '副主编', tags: ['教材', '营销'], highlight: false,
+    },
+    {
+      id: 'pub-4', type: 'book', title: '酒店英语',
+      authors: ['陈洁', '龚光彬（副主编）'], venue: '旅游教育出版社', year: 2023, month: 9,
+      level: '院级重点教材', role: '副主编', tags: ['教材', '英语'], highlight: false,
+    },
+    {
+      id: 'pub-5', type: 'project', title: '基于 RAG 的酒店智能问答系统研究与教学实践',
+      authors: ['龚光彬'], venue: '校级课题', year: 2025, month: 4,
+      level: '在研', role: '主持', tags: ['RAG', 'AI'], highlight: true,
+    },
+    {
+      id: 'pub-6', type: 'project', title: '酒店数字化转型实践教学体系构建',
+      authors: ['龚光彬'], venue: '校级课题', year: 2024, month: 10,
+      level: '在研', role: '主持', tags: ['数字化', '实践教学'], highlight: false,
+    },
+    {
+      id: 'pub-7', type: 'award', title: '第九届全国饭店业职业技能竞赛全国总决赛 银奖',
+      authors: ['龚光彬'], venue: '中国饭店协会', year: 2024, month: 8,
+      level: '国家级', role: '参赛教师', tags: ['竞赛', '获奖'], highlight: false,
+    },
+    {
+      id: 'pub-8', type: 'award', title: '指导学生获"问途杯"全国高校酒店数字营销大赛 一等奖',
+      authors: ['龚光彬（指导教师）'], venue: '全国旅游职业教育教学指导委员会', year: 2025, month: 5,
+      level: '国家级', role: '指导教师', tags: ['竞赛', '指导学生'], highlight: true,
+    },
+  ];
+
+  /* 关于 / 个人主页 */
+  const ABOUT = {
+    name: '龚光彬',
+    englishName: 'Miro',
+    title: '副教授',
+    affiliation: '三亚中瑞酒店管理职业学院 · 酒店管理系',
+    bio: '拥有 12 年酒店一线管理经验，近 9 年高校教学经历。长期聚焦高职智慧教育改革、酒店数字化转型与酒店 AI 应用（含 RAG 课题）研究，运营"酒店英语""趣味树洞"两个微信公众号，具备 WordPress 与自动化流水线实践经验。',
+    qualifications: ['中级网络工程师', '高级互联网营销师', '人工智能训练师（二级技师）'],
+    researchAreas: ['高职智慧教育改革', '酒店数字化转型', '酒店 AI 应用（RAG）'],
+    links: {
+      github: '#',
+      website: 'https://hotelenglish.cn',
+      wechat: '酒店英语 / 趣味树洞',
+      scholar: '#',
+    },
+  };
+
+  /* =====================================================================
+   *  应用状态
+   * ===================================================================== */
+  const state = {
+    semesterId: (function () {
+      const saved = localStorage.getItem('wt_semester');
+      return SEMESTERS.some(s => s.id === saved) ? saved : (SEMESTERS.find(s => s.current) || SEMESTERS[0]).id;
+    })(),
+    // 课表筛选
+    schedWeek: null,    // null = 当前周
+    schedCourse: 'all',
+    // 日历视图
+    calYear: TODAY.getFullYear(),
+    calMonth: TODAY.getMonth(),
+    calSelected: null,  // 'YYYY-M-D'
+    // 科研筛选
+    researchFilter: 'all',
+  };
+
+  /* =====================================================================
+   *  工具函数
+   * ===================================================================== */
+  function getSemester() {
+    return SEMESTERS.find(s => s.id === state.semesterId) || SEMESTERS[0];
+  }
+
+  function parseDate(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d, 12, 0, 0);
+  }
+
+  function myDayOfWeek(date) {
+    const d = date.getDay(); // 0=周日
+    return d === 0 ? 7 : d;   // 1=周一 ... 7=周日
+  }
+
+  function weekOf(date, semester) {
+    const start = parseDate(semester.startDate);
+    const diffDays = Math.floor((date - start) / 86400000);
+    return Math.floor(diffDays / 7) + 1;
+  }
+
+  function parseWeeks(weeksStr) {
+    const parity = weeksStr.includes('单周') ? 'odd' : weeksStr.includes('双周') ? 'even' : 'all';
+    const m = weeksStr.match(/(\d+)\s*-\s*(\d+)/);
+    const start = m ? parseInt(m[1], 10) : 1;
+    const end = m ? parseInt(m[2], 10) : 18;
+    return { start, end, parity };
+  }
+
+  function sessionActiveOn(session, weekNum) {
+    const w = parseWeeks(session.weeks);
+    if (weekNum < w.start || weekNum > w.end) return false;
+    if (w.parity === 'odd' && weekNum % 2 === 0) return false;
+    if (w.parity === 'even' && weekNum % 2 === 1) return false;
+    return true;
+  }
+
+  function coursesOnDate(courses, semester, date) {
+    const week = weekOf(date, semester);
+    if (week < 1) return [];
+    const dow = myDayOfWeek(date);
+    const list = [];
+    courses.forEach(c => {
+      c.sessions.forEach(s => {
+        if (s.dayOfWeek === dow && sessionActiveOn(s, week)) {
+          list.push({ course: c, session: s });
+        }
+      });
+    });
+    return list;
+  }
+
+  function daysUntil(dateStr) {
+    const target = parseDate(dateStr);
+    const today = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate(), 12);
+    return Math.ceil((target - today) / 86400000);
+  }
+
+  function planProgress(plan) {
+    let total = 0, done = 0;
+    plan.chapters.forEach(c => { total += c.hours; if (c.status === 'done') done += c.hours; });
+    return total ? Math.round((done / total) * 100) : 0;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  }
+
+  function fmtDate(date) {
+    return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日 ${WEEK_CN[date.getDay()]}`;
+  }
+
+  /* =====================================================================
+   *  Header / 导航 渲染
+   * ===================================================================== */
+  function renderNav(currentKey) {
+    return NAV.map(n =>
+      `<a href="#/${n.key}" class="${n.key === currentKey ? 'active' : ''}" data-nav="${n.key}">${n.icon} ${n.label}</a>`
+    ).join('');
+  }
+
+  function renderHeader(currentKey) {
+    document.getElementById('mainnav').innerHTML = renderNav(currentKey);
+    document.getElementById('drawerNav').innerHTML = renderNav(currentKey);
+    const sel = document.getElementById('semesterSelect');
+    sel.innerHTML = SEMESTERS.map(s =>
+      `<option value="${s.id}" ${s.id === state.semesterId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`
+    ).join('');
+  }
+
+  /* =====================================================================
+   *  页面渲染
+   * ===================================================================== */
+
+  /* ---------- 首页 Dashboard ---------- */
+  function renderDashboard() {
+    const sem = getSemester();
+    const week = weekOf(TODAY, sem);
+    const todayCourses = coursesOnDate(sem.courses, sem, TODAY)
+      .sort((a, b) => a.session.start.localeCompare(b.session.start));
+
+    // 统计
+    const courseCount = sem.courses.length;
+    let totalH = 0, doneH = 0;
+    sem.plans.forEach(p => p.chapters.forEach(c => { totalH += c.hours; if (c.status === 'done') doneH += c.hours; }));
+    const planPct = totalH ? Math.round((doneH / totalH) * 100) : 0;
+    const weekSessions = sem.courses.reduce((acc, c) => acc + c.sessions.length, 0);
+    const pubCount = PUBLICATIONS.length;
+
+    const dd = daysUntil(sem.endDate);
+    const ddSoon = dd <= 30;
+    const ddText = dd >= 0 ? `距学期结束 ${dd} 天` : `学期已结束 ${-dd} 天`;
+
+    const todayCards = todayCourses.length
+      ? todayCourses.map(t => `
+          <div class="today-course" style="border-left-color:${t.course.color}">
+            <div class="time">${t.session.start}<br>${t.session.end}</div>
+            <div class="meta">
+              <div class="cname" style="color:${t.course.color}">${escapeHtml(t.course.name)}</div>
+              <div class="csub">${escapeHtml(t.course.classes.join(' / '))} · ${escapeHtml(t.course.location)}</div>
+            </div>
+          </div>`).join('')
+      : `<div class="muted">今天（${WEEK_CN[TODAY.getDay()]}）暂无排课 🎉</div>`;
+
+    const quick = NAV.filter(n => n.key !== 'dashboard').map(n =>
+      `<a href="#/${n.key}"><span class="ic">${n.icon}</span><span class="tx">${n.label}</span></a>`
+    ).join('');
+
+    return `
+      <h1 class="page-title">工作台首页</h1>
+      <p class="page-sub">${escapeHtml(sem.name)}</p>
+
+      <div class="infobar">
+        <div class="date">${fmtDate(TODAY)}</div>
+        <div class="countdown ${ddSoon ? 'soon' : ''}">⏳ ${ddText}${ddSoon ? ' · 临近' : ''}</div>
+        <div class="muted" style="margin-left:auto">第 ${Math.max(week, 0)} 教学周</div>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="stat"><div class="num">${courseCount}</div><div class="label">本学期课程</div></div>
+        <div class="stat"><div class="num">${planPct}%</div><div class="label">计划章节完成度</div></div>
+        <div class="stat"><div class="num">${weekSessions}</div><div class="label">周课时（节/周）</div></div>
+        <div class="stat"><div class="num">${pubCount}</div><div class="label">科研成果</div></div>
+      </div>
+
+      <div class="section-h">📖 今日课程</div>
+      ${todayCards}
+
+      <div class="section-h">⚡ 快捷入口</div>
+      <div class="quick">${quick}</div>
+    `;
+  }
+
+  /* ---------- 课表 周视图 ---------- */
+  function renderSchedule() {
+    const sem = getSemester();
+    const week = state.schedWeek || weekOf(TODAY, sem);
+
+    const courseOptions = `<option value="all">全部课程</option>` +
+      sem.courses.map(c => `<option value="${c.id}" ${state.schedCourse === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('');
+    const weekOptions = `<option value="current" ${!state.schedWeek ? 'selected' : ''}>第 ${Math.max(week, 0)} 周（当前）</option>` +
+      Array.from({ length: sem.totalWeeks }, (_, i) => `<option value="${i + 1}" ${state.schedWeek === i + 1 ? 'selected' : ''}>第 ${i + 1} 周</option>`).join('');
+
+    // 构建 (day, periodStart) -> [{course, session}]
+    const grid = {};
+    for (let d = 1; d <= 7; d++) {
+      grid[d] = {};
+      PERIODS.forEach(p => { grid[d][p.start] = []; });
+    }
+    sem.courses.forEach(c => {
+      if (state.schedCourse !== 'all' && c.id !== state.schedCourse) return;
+      c.sessions.forEach(s => {
+        if (grid[s.dayOfWeek] && grid[s.dayOfWeek][s.start] && sessionActiveOn(s, week)) {
+          grid[s.dayOfWeek][s.start].push({ course: c, session: s });
+        }
+      });
+    });
+
+    let html = `<div class="sg-head" style="grid-column:1;"></div>`;
+    for (let d = 1; d <= 7; d++) {
+      const we = (d === 6 || d === 7) ? ' weekend' : '';
+      html += `<div class="sg-head${we}">${CAL_DOW[d - 1]}</div>`;
+    }
+    PERIODS.forEach(p => {
+      html += `<div class="sg-cell sg-period">${p.no}<small>${p.start}</small></div>`;
+      for (let d = 1; d <= 7; d++) {
+        const we = (d === 6 || d === 7) ? ' weekend' : '';
+        const blocks = grid[d][p.start].map(t => `
+          <div class="course-block" style="background:${t.course.color}" title="${escapeHtml(t.course.name)}">
+            <div class="cb-name">${escapeHtml(t.course.name)}</div>
+            <div class="cb-sub">${escapeHtml(t.course.classes.join('/'))}</div>
+            <div class="cb-loc">${escapeHtml(t.course.location)}</div>
+          </div>`).join('');
+        html += `<div class="sg-cell${we}">${blocks}</div>`;
+      }
+    });
+
+    return `
+      <h1 class="page-title">课表 · 周视图</h1>
+      <p class="page-sub">${escapeHtml(sem.name)}</p>
+      <div class="controls">
+        <label>周次：</label>
+        <select class="filter" id="schedWeekSel">${weekOptions}</select>
+        <label>筛选：</label>
+        <select class="filter" id="schedCourseSel">${courseOptions}</select>
+      </div>
+      <div class="schedule-scroll">
+        <div class="schedule-grid">${html}</div>
+      </div>
+    `;
+  }
+
+  /* ---------- 日历 月视图 ---------- */
+  function renderCalendar() {
+    const sem = getSemester();
+    const year = state.calYear, month = state.calMonth;
+    const first = new Date(year, month, 1, 12);
+    const startDow = first.getDay(); // 0=周日
+    const lead = (startDow + 6) % 7; // 周一为首列的偏移
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += `<div class="cal-day empty"></div>`;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day, 12);
+      const dow = myDayOfWeek(date);
+      const we = (dow === 6 || dow === 7);
+      const list = coursesOnDate(sem.courses, sem, date);
+      const hasClass = list.length > 0;
+      const isToday = day === TODAY.getDate() && month === TODAY.getMonth() && year === TODAY.getFullYear();
+      const key = `${year}-${month}-${day}`;
+      const isSel = state.calSelected === key;
+      const cls = ['cal-day'];
+      if (we) cls.push('we');
+      if (hasClass) cls.push('has-class');
+      if (isToday) cls.push('today');
+      if (isSel) cls.push('selected');
+      const attr = hasClass ? ` data-day="${key}"` : '';
+      cells += `<div class="${cls.join(' ')}"${attr}>${day}</div>`;
+    }
+
+    // 选中日详情
+    let detail = '';
+    if (state.calSelected) {
+      const [yy, mm, dd] = state.calSelected.split('-').map(Number);
+      const date = new Date(yy, mm, dd, 12);
+      const list = coursesOnDate(sem.courses, sem, date);
+      const items = list.length
+        ? list.sort((a, b) => a.session.start.localeCompare(b.session.start)).map(t => `
+            <div class="today-course" style="border-left-color:${t.course.color}">
+              <div class="time">${t.session.start}<br>${t.session.end}</div>
+              <div class="meta">
+                <div class="cname" style="color:${t.course.color}">${escapeHtml(t.course.name)}</div>
+                <div class="csub">${escapeHtml(t.course.classes.join(' / '))} · ${escapeHtml(t.course.location)} · 第 ${weekOf(date, sem)} 周</div>
+              </div>
+            </div>`).join('')
+        : `<div class="muted">当天无排课。</div>`;
+      detail = `
+        <div class="cal-detail card">
+          <div class="day-title">${fmtDate(date)} 的课程</div>
+          ${items}
+        </div>`;
+    }
+
+    return `
+      <h1 class="page-title">日历 · 月视图</h1>
+      <p class="page-sub">${escapeHtml(sem.name)} · 圆点表示有课日，点击查看当天课程</p>
+      <div class="cal-head">
+        <div class="month">${year} 年 ${month + 1} 月</div>
+        <div class="cal-nav">
+          <button class="tab" id="calPrev">◀ 上月</button>
+          <button class="tab" id="calToday">今天</button>
+          <button class="tab" id="calNext">下月 ▶</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        ${CAL_DOW.map((d, i) => `<div class="cal-dow ${i >= 5 ? 'we' : ''}">${d}</div>`).join('')}
+        ${cells}
+      </div>
+      ${detail}
+    `;
+  }
+
+  /* ---------- 教学计划 ---------- */
+  function renderTeachingPlans() {
+    const sem = getSemester();
+    const cards = sem.plans.map(p => {
+      const pct = planProgress(p);
+      const chapters = p.chapters.map(c => {
+        const sm = STATUS_META[c.status] || STATUS_META.planned;
+        return `
+          <div class="chapter">
+            <div class="ch-no">${c.no}</div>
+            <div class="ch-main">
+              <div class="ch-title">${escapeHtml(c.title)}</div>
+              <div class="ch-sub">${c.hours} 学时 · 第 ${escapeHtml(c.week)} 周</div>
+            </div>
+            <span class="badge ${sm.cls}">${sm.label}</span>
+          </div>`;
+      }).join('');
+      return `
+        <div class="card plan-card" data-plan="${p.id}">
+          <div class="plan-head">
+            <div>
+              <div class="pname">${escapeHtml(p.courseName)}</div>
+              <div class="psub">${escapeHtml(p.summary)}</div>
+            </div>
+          </div>
+          <div class="progress"><span style="width:${pct}%"></span></div>
+          <div class="progress-meta">完成度 ${pct}% · ${p.chapters.length} 章 · 考核：${escapeHtml(p.assessment)}</div>
+          <div class="plan-detail hidden" id="pd-${p.id}">${chapters}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <h1 class="page-title">教学计划</h1>
+      <p class="page-sub">${escapeHtml(sem.name)} · 点击卡片展开大纲与进度</p>
+      <div class="grid grid-2">${cards}</div>
+    `;
+  }
+
+  /* ---------- 科研成果 ---------- */
+  function renderResearch() {
+    const filters = [
+      { key: 'all', label: '全部' },
+      { key: 'journal', label: '论文' },
+      { key: 'book', label: '教材' },
+      { key: 'project', label: '课题' },
+      { key: 'award', label: '获奖' },
+    ];
+    const tabs = filters.map(f => `<button class="tab ${state.researchFilter === f.key ? 'active' : ''}" data-filter="${f.key}">${f.label}</button>`).join('');
+
+    let items = PUBLICATIONS.slice();
+    if (state.researchFilter !== 'all') items = items.filter(p => p.type === state.researchFilter);
+    items.sort((a, b) => (b.year - a.year) || (b.month - a.month));
+
+    // 按年分组
+    const byYear = {};
+    items.forEach(p => { (byYear[p.year] = byYear[p.year] || []).push(p); });
+    const years = Object.keys(byYear).map(Number).sort((a, b) => b - a);
+
+    const groups = years.length ? years.map(y => {
+      const list = byYear[y].map(p => {
+        const tm = TYPE_META[p.type] || { label: p.type, icon: '📌' };
+        const tags = (p.tags || []).map(t => `<span class="pill gray">${escapeHtml(t)}</span>`).join('');
+        return `
+          <div class="card pub-item">
+            <div class="pub-ic">${tm.icon}</div>
+            <div style="flex:1">
+              <div class="pub-title">${escapeHtml(p.title)}</div>
+              <div class="pub-meta">${tm.label} · ${escapeHtml(p.authors.join('，'))} · ${escapeHtml(p.venue)} · ${p.year}.${String(p.month).padStart(2, '0')}${p.level ? ' · ' + escapeHtml(p.level) : ''} · ${escapeHtml(p.role)}</div>
+              <div style="margin-top:6px">${tags}</div>
+            </div>
+          </div>`;
+      }).join('');
+      return `<div class="year-group"><div class="year-label">${y} 年</div><div class="grid grid-auto">${list}</div></div>`;
+    }).join('') : `<div class="muted">该分类下暂无成果。</div>`;
+
+    return `
+      <h1 class="page-title">科研成果</h1>
+      <p class="page-sub">论文 / 教材 / 课题 / 获奖 · 跨学期累计</p>
+      <div class="tabs">${tabs}</div>
+      ${groups}
+    `;
+  }
+
+  /* ---------- 关于 ---------- */
+  function renderAbout() {
+    const a = ABOUT;
+    const quals = a.qualifications.map(q => `<span class="pill">${escapeHtml(q)}</span>`).join('');
+    const areas = a.researchAreas.map(r => `<span class="pill">${escapeHtml(r)}</span>`).join('');
+    const links = [
+      { ic: '💻', label: 'GitHub 源码', href: a.links.github },
+      { ic: '🌐', label: '个人网站 hotelenglish.cn', href: a.links.website },
+      { ic: '📱', label: '微信公众号：' + a.links.wechat, href: '#' },
+      { ic: '🎓', label: 'Google Scholar', href: a.links.scholar },
+    ].map(l => `<a class="link-btn" href="${l.href}" target="_blank" rel="noopener">${l.ic} ${escapeHtml(l.label)}</a>`).join('');
+
+    const quick = NAV.filter(n => n.key !== 'about').map(n =>
+      `<a href="#/${n.key}" class="link-btn">${n.icon} ${n.label}</a>`).join('');
+
+    return `
+      <h1 class="page-title">关于</h1>
+      <div class="card">
+        <div class="profile">
+          <div class="avatar">${escapeHtml(a.name.charAt(0))}</div>
+          <div>
+            <div class="pname">${escapeHtml(a.name)}（${escapeHtml(a.englishName)}）</div>
+            <div class="ptitle">${escapeHtml(a.title)} · ${escapeHtml(a.affiliation)}</div>
+          </div>
+        </div>
+        <p style="margin-top:16px">${escapeHtml(a.bio)}</p>
+        <div style="margin-top:8px"><strong>资质：</strong><br>${quals}</div>
+        <div style="margin-top:12px"><strong>研究方向：</strong><br>${areas}</div>
+        <div class="link-row">${links}</div>
+      </div>
+
+      <div class="section-h">🔗 站内导航</div>
+      <div class="link-row">${quick}</div>
+    `;
+  }
+
+  /* =====================================================================
+   *  路由 & 渲染分发
+   * ===================================================================== */
+  const ROUTES = {
+    'dashboard':      renderDashboard,
+    'schedule':       renderSchedule,
+    'calendar':       renderCalendar,
+    'teaching-plans': renderTeachingPlans,
+    'research':       renderResearch,
+    'about':          renderAbout,
+  };
+
+  function currentRoute() {
+    const key = (location.hash.replace('#/', '') || 'dashboard');
+    return ROUTES[key] ? key : 'dashboard';
+  }
+
+  function render() {
+    const key = currentRoute();
+    renderHeader(key);
+    document.getElementById('app').innerHTML = ROUTES[key]();
+    bindPage(key);
+    closeDrawer();
+    window.scrollTo(0, 0);
+  }
+
+  /* =====================================================================
+   *  事件绑定
+   * ===================================================================== */
+  function bindPage(key) {
+    if (key === 'schedule') {
+      const ws = document.getElementById('schedWeekSel');
+      const cs = document.getElementById('schedCourseSel');
+      if (ws) ws.addEventListener('change', e => {
+        const v = e.target.value;
+        state.schedWeek = v === 'current' ? null : parseInt(v, 10);
+        render();
+      });
+      if (cs) cs.addEventListener('change', e => {
+        state.schedCourse = e.target.value;
+        render();
+      });
+    }
+    if (key === 'calendar') {
+      const prev = document.getElementById('calPrev');
+      const next = document.getElementById('calNext');
+      const today = document.getElementById('calToday');
+      if (prev) prev.addEventListener('click', () => { shiftMonth(-1); });
+      if (next) next.addEventListener('click', () => { shiftMonth(1); });
+      if (today) today.addEventListener('click', () => {
+        state.calYear = TODAY.getFullYear(); state.calMonth = TODAY.getMonth(); state.calSelected = null; render();
+      });
+      document.querySelectorAll('.cal-day.has-class').forEach(cell => {
+        cell.addEventListener('click', () => {
+          state.calSelected = cell.getAttribute('data-day');
+          render();
+        });
+      });
+    }
+    if (key === 'teaching-plans') {
+      document.querySelectorAll('.plan-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-plan');
+          const det = document.getElementById('pd-' + id);
+          if (det) det.classList.toggle('hidden');
+        });
+      });
+    }
+    if (key === 'research') {
+      document.querySelectorAll('.tab[data-filter]').forEach(tab => {
+        tab.addEventListener('click', () => {
+          state.researchFilter = tab.getAttribute('data-filter');
+          render();
+        });
+      });
+    }
+  }
+
+  function shiftMonth(delta) {
+    let m = state.calMonth + delta;
+    let y = state.calYear;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    state.calMonth = m; state.calYear = y;
+    render();
+  }
+
+  /* Header 全局事件（仅绑定一次） */
+  function bindGlobal() {
+    document.getElementById('semesterSelect').addEventListener('change', e => {
+      state.semesterId = e.target.value;
+      localStorage.setItem('wt_semester', state.semesterId);
+      // 切换学期后重置依赖于学期的视图状态
+      state.schedWeek = null; state.schedCourse = 'all';
+      render();
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('wt_theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    document.getElementById('hamburger').addEventListener('click', openDrawer);
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
+    document.getElementById('drawerNav').addEventListener('click', e => {
+      if (e.target.closest('a')) closeDrawer();
+    });
+  }
+
+  function openDrawer() { document.getElementById('drawer').classList.add('open'); document.getElementById('drawerBackdrop').style.display = 'block'; }
+  function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('drawerBackdrop').style.display = 'none'; }
+
+  /* =====================================================================
+   *  初始化
+   * ===================================================================== */
+  function init() {
+    // 主题：localStorage 优先，否则跟随系统
+    const savedTheme = localStorage.getItem('wt_theme');
+    const theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+
+    bindGlobal();
+    window.addEventListener('hashchange', render);
+    if (!location.hash) location.hash = '#/dashboard';
+    render();
+  }
+
+  init();
+  </script>
+</body>
+</html>
