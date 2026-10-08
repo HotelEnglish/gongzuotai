@@ -21,6 +21,7 @@ const state = {
   calYM: null,        // 日历当前年月 { y, m }
   calDetail: null,    // 日历选中日期 ISO
   pubTab: '全部',
+  planCourse: null,   // 教学计划二级视图：选中的课程 courseId（null=课程列表）
   cache: new Map(),   // 学期数据缓存
 };
 
@@ -425,7 +426,7 @@ function closeModal() {
   document.getElementById('modalOverlay').hidden = true;
 }
 
-/* ---- 教学计划 ---- */
+/* ---- 教学计划（两级：课程列表 → 课程详情，详情按模块分卡片） ---- */
 function renderPlans() {
   const plans = state.plans.plans;
   if (!plans.length) { $app.innerHTML = '<div class="empty">本学期暂无教学计划数据</div>'; return; }
@@ -439,44 +440,92 @@ function renderPlans() {
         ${ch.points && ch.points.length ? `<ul class="chapter-points">${ch.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
       </li>`;
   };
-  const cards = plans.map(p => {
-    const done = p.chapters.filter(c => c.status === 'done').length;
-    const doing = p.chapters.filter(c => c.status === 'doing').length;
-    const pct = p.chapters.length ? Math.round((done / p.chapters.length) * 100) : 0;
+  const CN = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+  const modOrder = k => { const m = k.match(/模块([一二三四五六七八九十]+)/); return m ? (CN[m[1]] || 999) : 999; };
 
-    const useModules = p.chapters.some(c => c.module);
-    let chaptersHTML;
-    if (useModules) {
-      const groups = {};
-      for (const ch of p.chapters) (groups[ch.module] = groups[ch.module] || []).push(ch);
-      chaptersHTML = Object.keys(groups).map(mod => `
-        <li class="module-head">${esc(mod)}</li>
-        ${groups[mod].map(ch => chapterItemHTML(ch)).join('')}`).join('');
-    } else {
-      chaptersHTML = p.chapters.map(ch => chapterItemHTML(ch)).join('');
-    }
+  // 一级：课程列表
+  if (!state.planCourse) {
+    const cards = plans.map(p => {
+      const done = p.chapters.filter(c => c.status === 'done').length;
+      const doing = p.chapters.filter(c => c.status === 'doing').length;
+      const pct = p.chapters.length ? Math.round((done / p.chapters.length) * 100) : 0;
+      const modCount = p.chapters.some(c => c.module) ? new Set(p.chapters.map(c => c.module)).size : 0;
+      return `
+        <div class="card card-pad plan-course-card" data-course="${esc(p.courseId)}" role="button" tabindex="0">
+          <div class="plan-course-head">
+            <span class="plan-course-name">${esc(p.courseName)}</span>
+            <span class="plan-class">${esc(p.className)} · ${p.hours} 学时</span>
+          </div>
+          <div class="plan-course-goal">${esc(p.goal || '')}</div>
+          <div class="progress-row">
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span class="progress-num">${done}/${p.chapters.length} 任务 · ${pct}%${doing ? ` · ${doing} 进行中` : ''}</span>
+          </div>
+          <div class="plan-course-foot">${modCount ? `${modCount} 个模块 · ` : ''}${p.chapters.length} 个教学任务 · 点击查看详情 →</div>
+        </div>`;
+    }).join('');
+    $app.innerHTML = `
+      <div class="view-head">
+        <div class="view-title">教学计划</div>
+        <div class="view-desc">选择一门课程，查看其详细教学大纲与进度</div>
+      </div>${cards}`;
+    $app.querySelectorAll('.plan-course-card').forEach(el => {
+      const go = () => { state.planCourse = el.dataset.course; render(); };
+      el.onclick = go;
+      el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    });
+    return;
+  }
 
-    return `
-      <div class="card card-pad plan-card">
-        <div class="plan-head">
-          <span class="plan-course">${esc(p.courseName)}</span>
-          <span class="plan-class">${esc(p.className)} · ${p.hours} 学时</span>
-        </div>
-        <div style="color:var(--text-2);font-size:13px;margin-top:4px">${esc(p.goal || '')} · 考核：${esc(p.assessment || '')}</div>
-        <div class="progress-row">
-          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <span class="progress-num">${done}/${p.chapters.length} 章 · ${pct}%${doing ? ` · ${doing} 章进行中` : ''}</span>
+  // 二级：课程详情（按模块分卡片）
+  const p = plans.find(x => x.courseId === state.planCourse);
+  if (!p) { state.planCourse = null; render(); return; }
+  const done = p.chapters.filter(c => c.status === 'done').length;
+  const doing = p.chapters.filter(c => c.status === 'doing').length;
+  const pct = p.chapters.length ? Math.round((done / p.chapters.length) * 100) : 0;
+
+  const useModules = p.chapters.some(c => c.module);
+  let modulesHTML;
+  if (useModules) {
+    const groups = {};
+    for (const ch of p.chapters) (groups[ch.module] = groups[ch.module] || []).push(ch);
+    modulesHTML = Object.keys(groups).sort((a, b) => modOrder(a) - modOrder(b)).map(mod => `
+      <div class="card card-pad plan-module">
+        <div class="module-card-head">
+          <span class="module-card-title">${esc(mod)}</span>
+          <span class="module-card-meta">${groups[mod].length} 个任务</span>
         </div>
         <ul class="chapter-list">
-          ${chaptersHTML}
+          ${groups[mod].map(ch => chapterItemHTML(ch)).join('')}
+        </ul>
+      </div>`).join('');
+  } else {
+    modulesHTML = `
+      <div class="card card-pad plan-module">
+        <ul class="chapter-list">
+          ${p.chapters.map(ch => chapterItemHTML(ch)).join('')}
         </ul>
       </div>`;
-  }).join('');
+  }
+
   $app.innerHTML = `
+    <div class="plan-detail-back">
+      <button class="back-btn" id="planBack" type="button">← 返回课程列表</button>
+    </div>
     <div class="view-head">
-      <div class="view-title">教学计划</div>
-      <div class="view-desc">各课程大纲章节与教学进度（编辑 teachingPlans.json 更新）</div>
-    </div>${cards}`;
+      <div class="view-title">${esc(p.courseName)}</div>
+      <div class="view-desc">${esc(p.className)} · ${p.hours} 学时 · 考核：${esc(p.assessment || '')}</div>
+    </div>
+    <div class="card card-pad" style="margin-bottom:16px">
+      <div class="plan-course-goal" style="margin-bottom:10px">${esc(p.goal || '')}</div>
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span class="progress-num">${done}/${p.chapters.length} 任务 · ${pct}%${doing ? ` · ${doing} 进行中` : ''}</span>
+      </div>
+    </div>
+    ${modulesHTML}`;
+
+  document.getElementById('planBack').onclick = () => { state.planCourse = null; render(); };
 }
 
 /* ---- 科研成果 ---- */
@@ -684,9 +733,19 @@ async function init() {
     modalOv.addEventListener('click', e => { if (e.target === modalOv) closeModal(); });
     document.getElementById('modalClose').addEventListener('click', closeModal);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // 回到顶部（小火箭）：滚动超过一屏后显示，点击平滑回顶
+    const toTop = document.getElementById('toTop');
+    const onScroll = () => {
+      if (window.scrollY > window.innerHeight) toTop.classList.add('show');
+      else toTop.classList.remove('show');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    toTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    onScroll();
     window.addEventListener('hashchange', () => {
       const h = location.hash.replace(/^#\//, '') || 'dashboard';
-      if (VIEWS[h]) { state.view = h; render(); }
+      if (VIEWS[h]) { state.view = h; if (h === 'plans') state.planCourse = null; render(); }
     });
     render();
   } catch (err) {

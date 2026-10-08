@@ -175,6 +175,29 @@ html[data-theme="dark"] .card {
 .card-pad { padding: 20px; }
 .card + .card { margin-top: 16px; }
 
+/* ---- 教学计划：两级视图与模块卡片 ---- */
+.plan-course-card { cursor: pointer; }
+.plan-course-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.plan-course-name { font-size: 17px; font-weight: 650; color: var(--text); }
+.plan-course-goal { color: var(--text-2); font-size: 13.5px; margin-top: 6px; line-height: 1.6; }
+.plan-course-foot { margin-top: 12px; font-size: 13px; color: var(--accent); }
+.plan-detail-back { margin-bottom: 14px; }
+.back-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-2); border-radius: 999px; padding: 6px 16px; font-size: 13.5px; cursor: pointer; transition: color .2s ease, background .2s ease, border-color .2s ease; }
+.back-btn:hover { color: var(--accent); border-color: var(--accent); }
+.module-card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 2px solid var(--accent, #6c8cff); }
+.module-card-title { font-weight: 650; font-size: 15.5px; color: var(--text); }
+.module-card-meta { font-size: 12.5px; color: var(--text-3); white-space: nowrap; }
+/* 模块卡片禁用缩放悬停，避免大卡片 backdrop-filter 重绘卡顿 */
+.plan-module { transition: box-shadow .2s ease; }
+.plan-module:hover { transform: none; box-shadow: 0 6px 18px rgba(31,35,60,.08); }
+
+/* ---- 回到顶部（小火箭） ---- */
+.to-top { position: fixed; right: 22px; bottom: 22px; z-index: 60; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; box-shadow: var(--shadow); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .25s ease, transform .25s ease, color .2s ease, background .2s ease; }
+.to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.to-top:hover { color: var(--accent); background: var(--surface-2); }
+html:not([data-theme="dark"]) .to-top { background: rgba(255,255,255,.7); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+@media (max-width: 560px) { .to-top { right: 14px; bottom: 14px; width: 42px; height: 42px; } }
+
 .grid { display: grid; gap: 16px; }
 .grid-4 { grid-template-columns: repeat(4, 1fr); }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
