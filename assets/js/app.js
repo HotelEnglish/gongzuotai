@@ -429,11 +429,33 @@ function closeModal() {
 function renderPlans() {
   const plans = state.plans.plans;
   if (!plans.length) { $app.innerHTML = '<div class="empty">本学期暂无教学计划数据</div>'; return; }
+  const statusMap = { done: ['已完成', 'status-done'], doing: ['进行中', 'status-doing'], todo: ['未开始', 'status-todo'] };
+  const chapterItemHTML = ch => {
+    const [label, cls] = statusMap[ch.status] || statusMap.todo;
+    return `<li class="chapter-item">
+        <span class="chapter-title">${esc(ch.title)}</span>
+        <span class="chapter-meta">${esc(ch.weeks)}周 · ${ch.hours}学时</span>
+        <span class="status-chip ${cls}">${label}</span>
+        ${ch.points && ch.points.length ? `<ul class="chapter-points">${ch.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
+      </li>`;
+  };
   const cards = plans.map(p => {
     const done = p.chapters.filter(c => c.status === 'done').length;
     const doing = p.chapters.filter(c => c.status === 'doing').length;
     const pct = p.chapters.length ? Math.round((done / p.chapters.length) * 100) : 0;
-    const statusMap = { done: ['已完成', 'status-done'], doing: ['进行中', 'status-doing'], todo: ['未开始', 'status-todo'] };
+
+    const useModules = p.chapters.some(c => c.module);
+    let chaptersHTML;
+    if (useModules) {
+      const groups = {};
+      for (const ch of p.chapters) (groups[ch.module] = groups[ch.module] || []).push(ch);
+      chaptersHTML = Object.keys(groups).map(mod => `
+        <li class="module-head">${esc(mod)}</li>
+        ${groups[mod].map(ch => chapterItemHTML(ch)).join('')}`).join('');
+    } else {
+      chaptersHTML = p.chapters.map(ch => chapterItemHTML(ch)).join('');
+    }
+
     return `
       <div class="card card-pad plan-card">
         <div class="plan-head">
@@ -446,14 +468,7 @@ function renderPlans() {
           <span class="progress-num">${done}/${p.chapters.length} 章 · ${pct}%${doing ? ` · ${doing} 章进行中` : ''}</span>
         </div>
         <ul class="chapter-list">
-          ${p.chapters.map(ch => {
-            const [label, cls] = statusMap[ch.status] || statusMap.todo;
-            return `<li>
-              <span class="chapter-title">${esc(ch.title)}</span>
-              <span class="chapter-meta">${esc(ch.weeks)}周 · ${ch.hours}学时</span>
-              <span class="status-chip ${cls}">${label}</span>
-            </li>`;
-          }).join('')}
+          ${chaptersHTML}
         </ul>
       </div>`;
   }).join('');
