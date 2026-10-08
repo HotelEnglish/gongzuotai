@@ -602,18 +602,28 @@ function bindHeader() {
     render();
   };
 
-  document.getElementById('menuToggle').onclick = () => {
-    document.getElementById('mobileNav').classList.toggle('open');
+  const menuToggle = document.getElementById('menuToggle');
+  const mobileNav = document.getElementById('mobileNav');
+  const syncMenuBtn = () => {
+    const open = mobileNav.classList.contains('open');
+    menuToggle.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
   };
+  menuToggle.onclick = () => { mobileNav.classList.toggle('open'); syncMenuBtn(); };
   document.querySelectorAll('.mobile-nav a').forEach(a => {
-    a.addEventListener('click', () => document.getElementById('mobileNav').classList.remove('open'));
+    a.addEventListener('click', () => { mobileNav.classList.remove('open'); syncMenuBtn(); });
   });
 
   const themeBtn = document.getElementById('themeToggle');
+  const SUN_SVG = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+  const MOON_SVG = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   const applyTheme = t => {
     document.documentElement.dataset.theme = t;
     localStorage.setItem('wb-theme', t);
-    themeBtn.textContent = t === 'dark' ? '浅色' : '暗色';
+    // 当前暗色 → 显示太阳（点击切亮色）；当前亮色 → 显示月亮（点击切暗色）
+    themeBtn.innerHTML = t === 'dark' ? SUN_SVG : MOON_SVG;
+    themeBtn.setAttribute('aria-label', t === 'dark' ? '切换到亮色' : '切换到暗色');
   };
   applyTheme(localStorage.getItem('wb-theme') ||
     (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
