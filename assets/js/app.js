@@ -465,21 +465,8 @@ function renderPlans() {
 }
 
 /* ---- 科研成果 ---- */
-function renderPublications() {
-  const pubs = state.publications;
-  const tabs = ['全部', ...pubs.types];
-  const items = state.pubTab === '全部' ? pubs.items : pubs.items.filter(i => i.type === state.pubTab);
-
-  const byYear = new Map();
-  for (const it of items) {
-    if (!byYear.has(it.year)) byYear.set(it.year, []);
-    byYear.get(it.year).push(it);
-  }
-  const years = [...byYear.keys()].sort((a, b) => b - a);
-
-  const yearHTML = years.map(y => `
-    <div class="pub-year">${y} 年</div>
-    ${byYear.get(y).map(it => `
+function pubItemHTML(it) {
+  return `
       <div class="pub-item">
         <span class="pub-title">${esc(it.title)}</span>
         <span class="pub-meta">
@@ -491,7 +478,29 @@ function renderPublications() {
         </span>
         ${it.note ? `<span class="pub-note">${esc(it.note)}</span>` : ''}
         ${it.url ? `<a class="pub-note" href="${esc(it.url)}" target="_blank" rel="noopener">查看链接</a>` : ''}
-      </div>`).join('')}`).join('');
+      </div>`;
+}
+function renderPublications() {
+  const pubs = state.publications;
+  const tabs = ['全部', ...pubs.types];
+  const items = state.pubTab === '全部' ? pubs.items : pubs.items.filter(i => i.type === state.pubTab);
+
+  const byYear = new Map();
+  for (const it of items) {
+    const key = (typeof it.year === 'number' && !isNaN(it.year)) ? it.year : undefined;
+    if (!byYear.has(key)) byYear.set(key, []);
+    byYear.get(key).push(it);
+  }
+  const datedYears = [...byYear.keys()].filter(k => typeof k === 'number').sort((a, b) => b - a);
+  const undated = byYear.get(undefined) || [];
+  const years = undated.length ? [...datedYears, 'undated'] : datedYears;
+
+  const yearHTML = years.map(y => {
+    if (y === 'undated') {
+      return `<div class="pub-year">未注明年份</div>${undated.map(pubItemHTML).join('')}`;
+    }
+    return `<div class="pub-year">${y} 年</div>${byYear.get(y).map(pubItemHTML).join('')}`;
+  }).join('');
 
   $app.innerHTML = `
     <div class="view-head">
