@@ -1,0 +1,236 @@
+{
+  "_meta": {
+    "title": "龚光彬 本学期教学信息提取（2026-2027-1）",
+    "extractedAt": "2026-09-29",
+    "semester": "2026-2027-1",
+    "sources": [
+      "课表.png（课程排期，文本层提取）",
+      "三亚中瑞酒店管理职业学院2026-2027学年校历.pdf（pdfplumber 提取）",
+      "data/semesters/2026-2027-1/courses.json",
+      "data/semesters/2026-2027-1/semester.json",
+      "data/semesters/2026-2027-1/teachingPlans.json",
+      "data/about.json"
+    ],
+    "说明": "day 字段: 1=周一 … 7=周日；weeks.type: range=连续周 / parity=单双周(odd单/even双) / list=指定周。periods 为节次数组。时间为校历标准节次。"
+  },
+
+  "semester": {
+    "id": "2026-2027-1",
+    "name": "2026-2027学年 第一学期",
+    "week1Start": "2026-09-07",
+    "week1StartWeekday": "周一",
+    "totalWeeks": 18,
+    "semesterEnd": "2027-01-10",
+    "vacationStart": "2027-01-11"
+  },
+
+  "periodTimes": [
+    { "period": 1, "time": "08:30-09:10" },
+    { "period": 2, "time": "09:05-09:55" },
+    { "period": 3, "time": "10:25-11:05" },
+    { "period": 4, "time": "11:10-11:50" },
+    { "period": 5, "time": "14:30-15:10" },
+    { "period": 6, "time": "15:15-15:55" },
+    { "period": 7, "time": "16:05-16:45" },
+    { "period": 8, "time": "16:50-17:30" },
+    { "period": 9, "time": "19:00-19:40" },
+    { "period": 10, "time": "19:45-20:25" }
+  ],
+
+  "breaks": [
+    { "afterPeriod": 4, "label": "午休" },
+    { "afterPeriod": 8, "label": "晚饭" }
+  ],
+
+  "holidays": [
+    { "date": "2026-09-25", "name": "中秋节" },
+    { "date": "2026-10-01", "name": "国庆节" },
+    { "date": "2027-01-01", "name": "元旦" }
+  ],
+
+  "events": [
+    { "name": "学生运动会", "start": "2026-12-03", "end": "2026-12-04" }
+  ],
+
+  "teacher": {
+    "name": "龚光彬",
+    "enName": "Miro",
+    "title": "副教授",
+    "department": "三亚中瑞酒店管理职业学院 · 酒店管理系",
+    "coursesTaughtAll": [
+      "酒店信息技术",
+      "短视频拍摄与制作",
+      "新媒体运营实务",
+      "餐饮数字化运营与管理"
+    ],
+    "coursesThisSemester": [
+      "新媒体运营实务",
+      "餐饮数字化运营与管理"
+    ]
+  },
+
+  "summary": {
+    "distinctCourses": 2,
+    "totalClasses": 5,
+    "classes": ["56H2", "6C01", "6H34", "6H56", "6H08"],
+    "classSizes": { "56H2": 19, "6C01": 66, "6H34": 59, "6H56": 50, "6H08": 66 },
+    "totalStudentsNoDedup": 260
+  },
+
+  "courses": [
+    {
+      "id": "xmt-56h2",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "56H2",
+      "studentCount": 19,
+      "colorKey": "indigo",
+      "sessions": [
+        {
+          "day": 2, "dayName": "周二",
+          "periods": [1, 2], "periodLabel": "1-2节", "time": "08:30-09:55",
+          "weeks": { "type": "range", "from": 1, "to": 16, "label": "1-16周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N104", "location": "北教学楼N104",
+          "weeklyPeriods": 2, "activeWeeks": 16, "totalPeriods": 32
+        },
+        {
+          "day": 4, "dayName": "周四",
+          "periods": [5, 6], "periodLabel": "5-6节", "time": "14:30-15:55",
+          "weeks": { "type": "parity", "parity": "even", "from": 2, "to": 16, "label": "双周(2-16周)" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N104", "location": "北教学楼N104",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        }
+      ]
+    },
+    {
+      "id": "xmt-6c01",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "6C01",
+      "studentCount": 66,
+      "colorKey": "indigo",
+      "sessions": [
+        {
+          "day": 2, "dayName": "周二",
+          "periods": [5, 6], "periodLabel": "5-6节", "time": "14:30-15:55",
+          "weeks": { "type": "range", "from": 10, "to": 17, "label": "10-17周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N104", "location": "北教学楼N104",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        },
+        {
+          "day": 2, "dayName": "周二",
+          "periods": [7, 8], "periodLabel": "7-8节", "time": "16:05-17:30",
+          "weeks": { "type": "range", "from": 10, "to": 17, "label": "10-17周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N104", "location": "北教学楼N104",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        },
+        {
+          "day": 5, "dayName": "周五",
+          "periods": [7, 8], "periodLabel": "7-8节", "time": "16:05-17:30",
+          "weeks": { "type": "range", "from": 10, "to": 17, "label": "10-17周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N104", "location": "北教学楼N104",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        }
+      ]
+    },
+    {
+      "id": "xmt-6h34",
+      "name": "新媒体运营实务",
+      "code": "1052BM",
+      "className": "6H34",
+      "studentCount": 59,
+      "colorKey": "indigo",
+      "sessions": [
+        {
+          "day": 1, "dayName": "周一",
+          "periods": [3, 4], "periodLabel": "3-4节", "time": "10:25-11:50",
+          "weeks": { "type": "range", "from": 1, "to": 16, "label": "1-16周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N105", "location": "北教学楼N105",
+          "weeklyPeriods": 2, "activeWeeks": 16, "totalPeriods": 32
+        },
+        {
+          "day": 2, "dayName": "周二",
+          "periods": [7, 8], "periodLabel": "7-8节", "time": "16:05-17:30",
+          "weeks": { "type": "range", "from": 1, "to": 8, "label": "1-8周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N105", "location": "北教学楼N105",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        }
+      ]
+    },
+    {
+      "id": "cy-6h56",
+      "name": "餐饮数字化运营与管理",
+      "code": "10120BC",
+      "className": "6H56",
+      "studentCount": 50,
+      "colorKey": "teal",
+      "sessions": [
+        {
+          "day": 4, "dayName": "周四",
+          "periods": [7, 8], "periodLabel": "7-8节", "time": "16:05-17:30",
+          "weeks": { "type": "range", "from": 10, "to": 17, "label": "10-17周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N304", "location": "北教学楼N304",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        }
+      ]
+    },
+    {
+      "id": "cy-6h08",
+      "name": "餐饮数字化运营与管理",
+      "code": "10120BC",
+      "className": "6H08",
+      "studentCount": 66,
+      "colorKey": "teal",
+      "sessions": [
+        {
+          "day": 1, "dayName": "周一",
+          "periods": [5, 6], "periodLabel": "5-6节", "time": "14:30-15:55",
+          "weeks": { "type": "range", "from": 10, "to": 17, "label": "10-17周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N204", "location": "北教学楼N204",
+          "weeklyPeriods": 2, "activeWeeks": 8, "totalPeriods": 16
+        },
+        {
+          "day": 6, "dayName": "周六",
+          "periods": [1, 2, 3, 4, 5,6, 7, 8], "periodLabel": "1-8节", "time": "08:30-20:25",
+          "weeks": { "type": "range", "from": 5, "to": 8, "label": "5-8周" },
+          "campus": "三亚部", "building": "北教学楼", "room": "N205", "location": "北教学楼N205",
+          "weeklyPeriods": 8, "activeWeeks": 4, "totalPeriods": 32
+        }
+      ]
+    }
+  ],
+
+  "teachingPlans": [
+    {
+      "courseId": "xmt-56h2",
+      "courseName": "新媒体运营实务",
+      "className": "56H2",
+      "hours": 56,
+      "goal": "掌握新媒体平台运营方法与内容策划能力",
+      "assessment": "过程考核 60% + 期末作品 40%",
+      "chapters": [
+        { "title": "新媒体运营概述与岗位认知", "weeks": "1-2", "hours": 6, "status": "done" },
+        { "title": "账号定位与内容策划", "weeks": "3-5", "hours": 10, "status": "doing" },
+        { "title": "短视频平台运营实务", "weeks": "6-9", "hours": 12, "status": "todo" },
+        { "title": "图文平台与公众号运营", "weeks": "10-12", "hours": 10, "status": "todo" },
+        { "title": "数据复盘与增长", "weeks": "13-14", "hours": 8, "status": "todo" },
+        { "title": "综合实训与作品路演", "weeks": "15-16", "hours": 10, "status": "todo" }
+      ]
+    },
+    {
+      "courseId": "cy-6h56",
+      "courseName": "餐饮数字化运营与管理",
+      "className": "6H56",
+      "hours": 32,
+      "goal": "理解餐饮企业数字化运营全流程与工具应用",
+      "assessment": "过程考核 50% + 期末方案 50%",
+      "chapters": [
+        { "title": "餐饮数字化概述", "weeks": "10", "hours": 4, "status": "todo" },
+        { "title": "点餐与收银系统实操", "weeks": "11-12", "hours": 8, "status": "todo" },
+        { "title": "外卖平台与私域运营", "weeks": "13-14", "hours": 8, "status": "todo" },
+        { "title": "会员与营销数字化", "weeks": "15-16", "hours": 6, "status": "todo" },
+        { "title": "数字化方案设计实训", "weeks": "17", "hours": 6, "status": "todo" }
+      ]
+    }
+  ]
+}

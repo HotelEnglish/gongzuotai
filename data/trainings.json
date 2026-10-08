@@ -1,0 +1,25 @@
+{
+  "_说明": "培训学习记录。每一条外出学习培训经历一行；字段：project 项目名称 / type 培训类型 / form 培训形式 / organizer 举办部门名称 / level 培训级别 / duration 培训时长 / location 培训地点。新增时复制一条改内容即可，前端自动渲染表格（data-table）。note 字段仅用于备注/占位说明，可留空。",
+  "items": [
+    {
+      "project": "职业教育高质量发展专题培训",
+      "type": "国培",
+      "form": "集中面授",
+      "organizer": "教育部职业教育发展中心",
+      "level": "国家级",
+      "duration": "7天",
+      "location": "北京",
+      "note": "示例条目，请替换为真实培训记录"
+    },
+    {
+      "project": "酒店数字化运营师资研修",
+      "type": "省培",
+      "form": "线上线下混合",
+      "organizer": "海南省教育厅",
+      "level": "省级",
+      "duration": "40学时",
+      "location": "海口",
+      "note": "示例条目，请替换为真实培训记录"
+    }
+  ]
+}

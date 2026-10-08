@@ -15,6 +15,7 @@ const state = {
   plans: null,        // teachingPlans.json
   publications: null, // data/publications.json
   about: null,        // data/about.json
+  trains: null,       // data/trainings.json
   view: 'dashboard',
   schedWeek: null,    // 课表当前选中周
   calYM: null,        // 日历当前年月 { y, m }
@@ -228,6 +229,7 @@ function renderDashboard() {
           <a href="#/calendar">查看日历</a>
           <a href="#/plans">教学计划</a>
           <a href="#/publications">科研成果</a>
+          <a href="#/trainings">培训学习</a>
         </div>
       </div>
     </div>`;
@@ -506,6 +508,34 @@ function renderPublications() {
   });
 }
 
+/* ---- 培训学习 ---- */
+function renderTrainings() {
+  const list = state.trains.items || [];
+  if (!list.length) {
+    $app.innerHTML = '<div class="empty">暂无培训学习记录，请在 data/trainings.json 中添加。</div>';
+    return;
+  }
+  const cols = [
+    ['project', '项目名称'], ['type', '培训类型'], ['form', '培训形式'],
+    ['organizer', '举办部门名称'], ['level', '培训级别'], ['duration', '培训时长'], ['location', '培训地点'],
+  ];
+  const head = `<tr>${cols.map(([, label]) => `<th>${esc(label)}</th>`).join('')}</tr>`;
+  const body = list.map(it => `<tr>${cols.map(([key]) => {
+    if (key === 'project') {
+      return `<td><b>${esc(it.project || '')}</b>${it.note ? `<div class="pub-note">${esc(it.note)}</div>` : ''}</td>`;
+    }
+    return `<td>${esc(it[key] || '')}</td>`;
+  }).join('')}</tr>`).join('');
+  $app.innerHTML = `
+    <div class="view-head">
+      <div class="view-title">培训学习</div>
+      <div class="view-desc">外出学习培训经历记录（编辑 data/trainings.json 即可新增更新）</div>
+    </div>
+    <div class="card data-table-wrap">
+      <table class="data-table"><thead>${head}</thead><tbody>${body}</tbody></table>
+    </div>`;
+}
+
 /* ---- 关于 ---- */
 function renderAbout() {
   const a = state.about;
@@ -539,6 +569,7 @@ const VIEWS = {
   calendar: { title: '日历', fn: renderCalendar },
   plans: { title: '教学计划', fn: renderPlans },
   publications: { title: '科研成果', fn: renderPublications },
+  trainings: { title: '培训学习', fn: renderTrainings },
   about: { title: '关于', fn: renderAbout },
 };
 
@@ -602,12 +633,14 @@ async function init() {
     await loadIndex();
     const target = new URLSearchParams(location.hash.split('?')[1] || '');
     await loadSemester(state.index.currentSemester);
-    const [pubs, about] = await Promise.all([
+    const [pubs, about, trains] = await Promise.all([
       fetchJSON('data/publications.json'),
       fetchJSON('data/about.json'),
+      fetchJSON('data/trainings.json'),
     ]);
     state.publications = pubs;
     state.about = about;
+    state.trains = trains;
 
     const hash = location.hash.replace(/^#\//, '') || 'dashboard';
     state.view = VIEWS[hash] ? hash : 'dashboard';
