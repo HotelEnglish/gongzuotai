@@ -516,7 +516,7 @@ function renderTrainings() {
     return;
   }
   const cols = [
-    ['project', '项目名称'], ['type', '培训类型'], ['form', '培训形式'],
+    ['dateRange', '起止时间'], ['project', '项目名称'], ['type', '培训类型'], ['form', '培训形式'],
     ['organizer', '举办部门名称'], ['level', '培训级别'], ['duration', '培训时长'], ['location', '培训地点'],
   ];
   const head = `<tr>${cols.map(([, label]) => `<th>${esc(label)}</th>`).join('')}</tr>`;
@@ -529,7 +529,7 @@ function renderTrainings() {
   $app.innerHTML = `
     <div class="view-head">
       <div class="view-title">培训学习</div>
-      <div class="view-desc">外出学习培训经历记录（编辑 data/trainings.json 即可新增更新）</div>
+      <div class="view-desc">外出学习培训经历记录，共 ${list.length} 条（编辑 data/trainings.json 即可新增更新）</div>
     </div>
     <div class="card data-table-wrap">
       <table class="data-table"><thead>${head}</thead><tbody>${body}</tbody></table>

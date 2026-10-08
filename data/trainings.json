@@ -1,25 +1,166 @@
 {
-  "_说明": "培训学习记录。每一条外出学习培训经历一行；字段：project 项目名称 / type 培训类型 / form 培训形式 / organizer 举办部门名称 / level 培训级别 / duration 培训时长 / location 培训地点。新增时复制一条改内容即可，前端自动渲染表格（data-table）。note 字段仅用于备注/占位说明，可留空。",
+  "_说明": "培训学习记录。每一条外出学习培训经历一行；字段：dateRange 起止时间 / project 项目名称 / type 培训类型 / form 培训形式(线上·线下) / organizer 举办部门名称 / level 培训级别(国家级·省级·校级·行业企业) / duration 培训时长 / location 培训地点。level 与 form 由主办单位与地点推断，原表未明确者留空。新增时复制一条改内容即可，前端自动渲染表格（data-table）。note 仅用于特殊说明（如原始记录日期缺失）。",
   "items": [
     {
-      "project": "职业教育高质量发展专题培训",
-      "type": "国培",
-      "form": "集中面授",
-      "organizer": "教育部职业教育发展中心",
-      "level": "国家级",
-      "duration": "7天",
-      "location": "北京",
-      "note": "示例条目，请替换为真实培训记录"
+      "dateRange": "2017.07.18-07.27",
+      "project": "瑞士洛桑酒店管理学院“Qualified Learning Facilitator”师资认证培训",
+      "type": "国际师资认证",
+      "form": "线下",
+      "organizer": "三亚中瑞酒店管理职业学院",
+      "level": "校级",
+      "duration": "80 学时",
+      "location": "三亚"
     },
     {
-      "project": "酒店数字化运营师资研修",
-      "type": "省培",
-      "form": "线上线下混合",
+      "dateRange": "2019.04.25-04.27",
+      "project": "2019 年度高职院校教学能力提升培训",
+      "type": "教学能力提升",
+      "form": "线下",
       "organizer": "海南省教育厅",
       "level": "省级",
-      "duration": "40学时",
+      "duration": "16 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2019.07.25-07.28",
+      "project": "全国职业院校“双师型”教师专业素质提升培训",
+      "type": "双师型素质提升",
+      "form": "线下",
+      "organizer": "中国职业教育学会",
+      "level": "国家级",
+      "duration": "24 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2020.02.19-04.25",
+      "project": "教师教学、科研能力提升培训",
+      "type": "教学与科研能力提升",
+      "form": "线下",
+      "organizer": "国家教育行政学院",
+      "level": "国家级",
+      "duration": "40 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2021.01.27-01.29",
+      "project": "海南省高职院校课程思政和教学能力提升培训",
+      "type": "课程思政与教学能力",
+      "form": "线下",
+      "organizer": "海南省教育厅",
+      "level": "省级",
+      "duration": "24 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2021.03.19-07.15",
+      "project": "课程思政体系建设专题网络培训",
+      "type": "课程思政体系",
+      "form": "线上",
+      "organizer": "国家教育行政学院",
+      "level": "国家级",
+      "duration": "30 学时",
+      "location": "线上"
+    },
+    {
+      "dateRange": "2021.05.15-05.16",
+      "project": "全国职业院校教师信息化教学技能培训",
+      "type": "信息化教学技能",
+      "form": "线下",
+      "organizer": "国家数字化学习资源中心",
+      "level": "国家级",
+      "duration": "24 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2021.06.30-（结束日期原文缺失）",
+      "project": "海南省高等职业院校教师教育教学能力提升第一期培训",
+      "type": "教育教学能力提升",
+      "form": "线下",
+      "organizer": "海南省职业教育师资培训中心",
+      "level": "省级",
+      "duration": "20 学时",
       "location": "海口",
-      "note": "示例条目，请替换为真实培训记录"
+      "note": "原始记录结束日期不完整，已据起始日标注"
+    },
+    {
+      "dateRange": "2021.11.18-11.20",
+      "project": "海南高职院校教师新媒体运用能力提升培训",
+      "type": "新媒体运用能力",
+      "form": "线下",
+      "organizer": "海南省职业教育师资培训中心",
+      "level": "省级",
+      "duration": "20 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2024.05.10-08.31",
+      "project": "2024 年高职学校中青年教师教学创新能力提升专题网络培训",
+      "type": "教学创新能力",
+      "form": "线上",
+      "organizer": "国家教育行政学院",
+      "level": "国家级",
+      "duration": "40 学时",
+      "location": "线上"
+    },
+    {
+      "dateRange": "2024.11.08-11.10",
+      "project": "数智赋能教育创新发展论坛",
+      "type": "数智教育论坛",
+      "form": "线下",
+      "organizer": "中国教育技术协会",
+      "level": "国家级",
+      "duration": "16 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2025.11.26-11.28",
+      "project": "系统推进职业教育“五金”建设系列——金课建设高级研修班",
+      "type": "金课建设（产教融合）",
+      "form": "线下",
+      "organizer": "海南省教育厅",
+      "level": "省级",
+      "duration": "16 学时",
+      "location": "海口"
+    },
+    {
+      "dateRange": "2026.01.24-01.27",
+      "project": "AI 训练营：通识知识赋能多场景项目实践",
+      "type": "AI 训练营",
+      "form": "线下",
+      "organizer": "嘉环科技股份有限公司",
+      "level": "行业（企业）",
+      "duration": "40 学时",
+      "location": "陵水"
+    },
+    {
+      "dateRange": "2026.05.25-06.03",
+      "project": "2026 上半年高职学校教职工党员发展与党性修养提升网络培训",
+      "type": "党性修养与党员发展",
+      "form": "线上",
+      "organizer": "国家教育行政学院",
+      "level": "国家级",
+      "duration": "32 学时",
+      "location": "线上"
+    },
+    {
+      "dateRange": "2026.07.13-11.13",
+      "project": "三亚中瑞酒店管理职业学院教师教育教学能力提升专题网络培训",
+      "type": "教育教学能力提升",
+      "form": "线上",
+      "organizer": "国家教育行政学院",
+      "level": "国家级",
+      "duration": "32 学时",
+      "location": "线上"
+    },
+    {
+      "dateRange": "2026.07.21-07.25",
+      "project": "2026 全国高校 AI 创新应用师资高阶研修班",
+      "type": "AI 创新应用研修",
+      "form": "线下",
+      "organizer": "慧科教育科技集团",
+      "level": "行业（企业）",
+      "duration": "40 学时",
+      "location": "大理"
     }
   ]
 }
