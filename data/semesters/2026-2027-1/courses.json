@@ -46,6 +46,7 @@
       "studentCount": 50,
       "colorKey": "teal",
       "sessions": [
+        { "day": 1, "periods": [5, 6], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N204" },        
         { "day": 4, "periods": [7, 8], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N304" }
       ]
     },
@@ -57,7 +58,6 @@
       "studentCount": 66,
       "colorKey": "teal",
       "sessions": [
-        { "day": 1, "periods": [5, 6], "weeks": { "type": "range", "from": 10, "to": 17 }, "campus": "三亚部", "building": "北教学楼", "room": "N204" },
         { "day": 6, "periods": [1, 2, 3, 4, 5, 6, 7, 8], "weeks": { "type": "range", "from": 5, "to": 8 }, "campus": "三亚部", "building": "北教学楼", "room": "N205" }
       ]
     }
